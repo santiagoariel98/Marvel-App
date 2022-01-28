@@ -1,6 +1,57 @@
 const axios = require("axios");
 
 const MARVEL_API = process.env.MARVEL_API;
+const getEvents = (id) => {
+  return axios
+    .get(
+      `https://gateway.marvel.com/v1/public/characters/${id}/events${MARVEL_API}`
+    )
+    .then(({ data }) => {
+      const events = data.data.results;
+      const available = data.data.total;
+      const result = events.map((event) => ({
+        id: event.id,
+        desc: event.description,
+        pageCount: event.pageCount,
+        prices: event.prices,
+        startAndEnd: {
+          start: event.start,
+          end: event.end,
+        },
+        nextAndPrevious: {
+          next: event.next.name,
+          previous: event.previous.name,
+        },
+        thumbnail: event.thumbnail.path + "." + event.thumbnail.extension,
+        title: event.title,
+      }));
+      return { data: result, available };
+    })
+    .catch(() => ({ data: [], available: 0 }));
+};
+const getComics = (id) => {
+  return axios
+    .get(
+      `https://gateway.marvel.com/v1/public/characters/${id}/comics${MARVEL_API}`
+    )
+    .then(({ data }) => {
+      const comics = data.data.results;
+      const available = data.data.total;
+      const result = comics.map((comic) => ({
+        id: comic.id,
+        dates: comic.dates.filter((date) => date.type === "onsaleDate")[0],
+        desc: comic.description,
+        format: comic.format,
+        images: comic.images.map((image) => image.path + "." + image.extension),
+        pageCount: comic.pageCount,
+        prices: comic.prices,
+        thumbnail: comic.thumbnail.path + "." + comic.thumbnail.extension,
+        title: comic.title,
+      }));
+      return { data: result, available };
+    })
+    .catch(() => ({ data: [], available: 0 }));
+};
 
 module.exports = {
   getCharacters(req, res) {
@@ -16,9 +67,19 @@ module.exports = {
         .get(
           `https://gateway.marvel.com/v1/public/characters${MARVEL_API}&limit=${limit}&offset=${offset}`
         )
-        .then((request) => {
-          const data = request.data.data;
-          res.send({ data: data, success: true });
+        .then(({ data }) => {
+          data = data.data.results; // data request
+          const characters = data.map((character) => ({
+            id: character.id,
+            name: character.name,
+            comicsTotal: character.comics.available,
+            img: character.thumbnail.path + "." + character.thumbnail.extension,
+            seriesTotal: character.series.available,
+            storiesTotal: character.stories.available,
+            eventsTotal: character.events.available,
+          }));
+
+          res.send({ data: characters, success: true });
         });
     } catch (error) {
       res.send({ error: "An error has occurred", success: false }).status(500);
@@ -29,9 +90,28 @@ module.exports = {
     const { id } = req.params;
     axios
       .get(`https://gateway.marvel.com/v1/public/characters/${id}${MARVEL_API}`)
-      .then((request) => {
-        const data = request.data.data;
-        res.send({ data, success: true });
+      .then(async ({ data }) => {
+        data = data.data.results[0]; // data request
+        let events = { data: [], available: 0 },
+          comics = { data: [], available: 0 };
+
+        if (data.events.available) {
+          events = await getEvents(data.id);
+        }
+        if (data.comics.available) {
+          comics = await getComics(data.id);
+        }
+        const characterInfo = {
+          id: data.id,
+          name: data.name,
+          img: data.thumbnail.path + "." + data.thumbnail.extension,
+          thumbnail:
+            data.thumbnail.path +
+            "/portrait_incredible." +
+            data.thumbnail.extension,
+        };
+
+        res.send({ ...characterInfo, comics, events });
       })
       .catch((err) => {
         res.send({ error: "Characters not found", success: false }).status(404);
