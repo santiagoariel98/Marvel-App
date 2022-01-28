@@ -15,10 +15,6 @@ const getSeries = (id, params = {}) => {
       const result = series.map((serie) => ({
         id: serie.id,
         title: serie.title,
-        desc: serie.description,
-        startYear: serie.startYear,
-        endYear: serie.endYear,
-        rating: serie.rating,
         type: serie.type,
         img: serie.thumbnail.path + "." + serie.thumbnail.extension,
       }));
@@ -41,8 +37,6 @@ const getStories = (id, params = {}) => {
         title: storie.title,
         desc: storie.description,
         type: storie.type,
-        img: storie.thumbnail,
-        characters: storie.characters.available,
         originalIssue: storie.originalIssue?.name,
       }));
 
@@ -63,17 +57,7 @@ const getEvents = (id, params = {}) => {
       const available = data.data.total;
       const result = events.map((event) => ({
         id: event.id,
-        desc: event.description,
-        pageCount: event.pageCount,
         prices: event.prices,
-        startAndEnd: {
-          start: event.start,
-          end: event.end,
-        },
-        nextAndPrevious: {
-          next: event.next.name,
-          previous: event.previous.name,
-        },
         img: event.thumbnail.path + "." + event.thumbnail.extension,
         title: event.title,
       }));
@@ -95,11 +79,7 @@ const getComics = (id, params = {}) => {
       const result = comics.map((comic) => ({
         id: comic.id,
         dates: comic.dates.filter((date) => date.type === "onsaleDate")[0],
-        desc: comic.description,
         format: comic.format,
-        images: comic.images.map((image) => image.path + "." + image.extension),
-        pageCount: comic.pageCount,
-        prices: comic.prices,
         img: comic.thumbnail.path + "." + comic.thumbnail.extension,
         title: comic.title,
       }));
