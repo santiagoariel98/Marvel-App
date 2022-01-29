@@ -98,9 +98,11 @@ module.exports = {
         const available = data.data.total;
         const result = events.map((event) => ({
           id: event.id,
-          prices: event.prices,
-          img: event.thumbnail.path + "." + event.thumbnail.extension,
           title: event.title,
+          desc: event.description,
+          start: event.start,
+          end: event.end,
+          img: event.thumbnail.path + "." + event.thumbnail.extension,
         }));
         return { data: result, available };
       })

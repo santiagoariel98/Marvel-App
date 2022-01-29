@@ -10,6 +10,7 @@ var usersRouter = require("./routes/users");
 // routes
 var characterRouter = require("./routes/character");
 var comicsRouter = require("./routes/comics");
+var creatorsRouter = require("./routes/creators");
 
 var app = express();
 // view engine setup
@@ -21,11 +22,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-
+// routes
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/api/characters", characterRouter);
 app.use("/api/comics", comicsRouter);
+app.use("/api/creators", creatorsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
