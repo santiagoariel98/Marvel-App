@@ -1,15 +1,17 @@
 var express = require("express");
 var router = express.Router();
 
-var charactersController = require("../controllers/characters");
+var charactersController = require("../controllers/characters/");
 
 /* GET users listing. */
-//characters
 
 // get characters
-router.get("", charactersController.getCharacters);
+router.get("/", charactersController.getCharacters);
 
-// get character
+// get new characters
+router.get("/news", charactersController.getNewCharacters);
+
+// get character id
 router.get("/:id", charactersController.getCharacterById);
 
 // get character comics

@@ -1,120 +1,33 @@
 const axios = require("axios");
-const { param } = require("express/lib/request");
+const {
+  allCharacters,
+  eventsCharacter,
+  storiesCharacter,
+  seriesCharacter,
+  comicsCharacter,
+  newCharacters,
+} = require("./utils.js");
 
 const MARVEL_API = process.env.MARVEL_API;
-const getSeries = (id, params = {}) => {
-  const limit = params.limit || 20;
-  const offset = params.offset || 0;
-  return axios
-    .get(
-      `https://gateway.marvel.com/v1/public/characters/${id}/series${MARVEL_API}&limit=${limit}&offset=${offset}`
-    )
-    .then(({ data }) => {
-      const series = data.data.results;
-      const available = data.data.total;
-      const result = series.map((serie) => ({
-        id: serie.id,
-        title: serie.title,
-        type: serie.type,
-        img: serie.thumbnail.path + "." + serie.thumbnail.extension,
-      }));
-      return { data: result, available };
-    })
-    .catch(() => ({ data: [], available: 0 }));
-};
-const getStories = (id, params = {}) => {
-  const limit = params.limit || 20;
-  const offset = params.offset || 0;
-  return axios
-    .get(
-      `https://gateway.marvel.com/v1/public/characters/${id}/stories${MARVEL_API}&limit=${limit}&offset=${offset}`
-    )
-    .then(({ data }) => {
-      const stories = data.data.results;
-      const available = data.data.total;
-      const result = stories.map((storie) => ({
-        id: storie.id,
-        title: storie.title,
-        desc: storie.description,
-        type: storie.type,
-        originalIssue: storie.originalIssue?.name,
-      }));
 
-      return { data: result, available };
-    })
-    .catch(() => ({ data: [], available: 0 }));
-};
-const getEvents = (id, params = {}) => {
-  const limit = params.limit || 20;
-  const offset = params.limit || 0;
-
-  return axios
-    .get(
-      `https://gateway.marvel.com/v1/public/characters/${id}/events${MARVEL_API}&limit=${limit}&offset=${offset}`
-    )
-    .then(({ data }) => {
-      const events = data.data.results;
-      const available = data.data.total;
-      const result = events.map((event) => ({
-        id: event.id,
-        prices: event.prices,
-        img: event.thumbnail.path + "." + event.thumbnail.extension,
-        title: event.title,
-      }));
-      return { data: result, available };
-    })
-    .catch(() => ({ data: [], available: 0 }));
-};
-const getComics = (id, params = {}) => {
-  const limit = params.limit || 20;
-  const offset = params.offset || 0;
-  console.log(limit, offset);
-  return axios
-    .get(
-      `https://gateway.marvel.com/v1/public/characters/${id}/comics${MARVEL_API}&limit=${limit}&offset=${offset}`
-    )
-    .then(({ data }) => {
-      const comics = data.data.results;
-      const available = data.data.total;
-      const result = comics.map((comic) => ({
-        id: comic.id,
-        dates: comic.dates.filter((date) => date.type === "onsaleDate")[0],
-        format: comic.format,
-        img: comic.thumbnail.path + "." + comic.thumbnail.extension,
-        title: comic.title,
-      }));
-      return { data: result, available };
-    })
-    .catch(() => ({ data: [], available: 0 }));
-};
 module.exports = {
-  getCharacters(req, res) {
+  async getCharacters(req, res) {
     try {
       const q = req.query;
       const page = q.page && q.page > 0 ? q.page : 1; // min:1, max: n, default:1
-      if (isNaN(page)) {
-        throw Error(`Error ${page} is not a number`);
-      }
+
       const limit = 20; // limit item per page
       const offset = page > 77 ? 1540 : limit * page - limit; // 1540 total Characters
-      axios
-        .get(
-          `https://gateway.marvel.com/v1/public/characters${MARVEL_API}&limit=${limit}&offset=${offset}`
-        )
-        .then(({ data }) => {
-          data = data.data.results; // data request
-          const characters = data.map((character) => ({
-            id: character.id,
-            name: character.name,
-            comicsTotal: character.comics.available,
-            img: character.thumbnail.path + "." + character.thumbnail.extension,
-            seriesTotal: character.series.available,
-            storiesTotal: character.stories.available,
-            eventsTotal: character.events.available,
-          }));
-
-          res.send({ data: characters, success: true });
-        });
+      const characters = await allCharacters({ limit, offset });
+      res.send({ data: characters, success: true });
+    } catch (error) {
+      res.send({ error: "An error has occurred", success: false }).status(500);
+    }
+  },
+  async getNewCharacters(req, res) {
+    try {
+      const characters = await newCharacters();
+      res.send({ data: characters, success: true });
     } catch (error) {
       res.send({ error: "An error has occurred", success: false }).status(500);
     }
@@ -132,29 +45,29 @@ module.exports = {
           series = { data: [], available: 0 };
 
         if (data.events.available) {
-          events = await getEvents(data.id);
+          events = await eventsCharacter(data.id);
         }
         if (data.comics.available) {
-          comics = await getComics(data.id);
+          comics = await comicsCharacter(data.id);
         }
         if (data.stories.available) {
-          stories = await getStories(data.id);
+          stories = await storiesCharacter(data.id);
         }
         if (data.stories.available) {
-          series = await getSeries(data.id);
+          series = await seriesCharacter(data.id);
         }
         const characterInfo = {
           id: data.id,
           name: data.name,
           img: data.thumbnail.path + "." + data.thumbnail.extension,
-        };
-
-        res.send({
-          ...characterInfo,
           series,
           comics,
           events,
           stories,
+        };
+
+        res.send({
+          data: characterInfo,
           success: true,
         });
       })
@@ -179,9 +92,9 @@ module.exports = {
     if (totalComics && page >= 2) {
       tPage = Math.ceil(totalComics / limit);
       offset = page >= tPage ? tPage * limit - limit : page * limit - limit;
-      comics = await getComics(id, { limit, offset });
+      comics = await comicsCharacter(id, { limit, offset });
     } else {
-      comics = await getComics(id, { limit });
+      comics = await comicsCharacter(id, { limit });
     }
     res.send(comics);
   },
@@ -201,9 +114,9 @@ module.exports = {
     if (totalEvents && page >= 2) {
       tPage = Math.ceil(totalEvents / limit);
       offset = page >= tPage ? tPage * limit - limit : page * limit - limit;
-      events = await getEvents(id, { limit, offset });
+      events = await eventsCharacter(id, { limit, offset });
     } else {
-      events = await getEvents(id, { limit });
+      events = await eventsCharacter(id, { limit });
     }
     res.send(events);
   },
@@ -223,9 +136,9 @@ module.exports = {
     if (totalSeries && page >= 2) {
       tPage = Math.ceil(totalSeries / limit);
       offset = page >= tPage ? tPage * limit - limit : page * limit - limit;
-      series = await getSeries(id, { limit, offset });
+      series = await seriesCharacter(id, { limit, offset });
     } else {
-      series = await getSeries(id, { limit });
+      series = await seriesCharacter(id, { limit });
     }
     res.send(series);
   },
@@ -246,9 +159,9 @@ module.exports = {
     if (totalStories && page >= 2) {
       tPage = Math.ceil(totalStories / limit);
       offset = page >= tPage ? tPage * limit - limit : page * limit - limit;
-      stories = await getStories(id, { limit, offset });
+      stories = await storiesCharacter(id, { limit, offset });
     } else {
-      stories = await getStories(id, { limit });
+      stories = await storiesCharacter(id, { limit });
     }
     res.send(stories);
   },
