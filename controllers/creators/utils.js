@@ -11,15 +11,15 @@ module.exports = {
         `https://gateway.marvel.com/v1/public/creators${MARVEL_API}&limit=${limit}&offset=${offset}`
       )
       .then(({ data }) => {
-        comics = data.data.results; // data request
-        const results = comics.map((comic) => ({
-          id: comic.id,
-          fullname: comic.fullName,
-          img: comic.thumbnail.path + "." + comic.thumbnail.extension,
-          totalComics: comic.comics.available,
-          totalEvents: comic.events.available,
-          totalSeries: comic.series.available,
-          totalStories: comic.stories.available,
+        const creators = data.data.results; // data request
+        const results = creators.map((creator) => ({
+          id: creator.id,
+          fullname: creator.fullName,
+          img: creator.thumbnail.path + "." + creator.thumbnail.extension,
+          totalComics: creator.comics.available,
+          totalEvents: creator.events.available,
+          totalSeries: creator.series.available,
+          totalStories: creator.stories.available,
         }));
         return results;
       });
@@ -30,13 +30,11 @@ module.exports = {
         `https://gateway.marvel.com/v1/public/creators${MARVEL_API}&orderBy=-modified`
       )
       .then(({ data }) => {
-        comics = data.data.results; // data request
-        const results = comics.map((comic) => ({
-          id: comic.id,
-          title: comic.title,
-          img: comic.thumbnail.path + "." + comic.thumbnail.extension,
-          onsale: comic.dates.filter((date) => date.type == "onsaleDate")[0],
-          totalPage: comic.pageCount,
+        const creators = data.data.results; // data request
+        const results = creators.map((creator) => ({
+          id: creator.id,
+          fullname: creator.fullName,
+          img: creator.thumbnail.path + "." + creator.thumbnail.extension,
         }));
         return results;
       });
