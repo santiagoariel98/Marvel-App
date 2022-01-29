@@ -12,6 +12,8 @@ var characterRouter = require("./routes/character");
 var comicsRouter = require("./routes/comics");
 var creatorsRouter = require("./routes/creators");
 var eventsRouter = require("./routes/events");
+var seriesRouter = require("./routes/series");
+
 var app = express();
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -29,6 +31,7 @@ app.use("/api/characters", characterRouter);
 app.use("/api/comics", comicsRouter);
 app.use("/api/creators", creatorsRouter);
 app.use("/api/events", eventsRouter);
+app.use("/api/series", seriesRouter);
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
