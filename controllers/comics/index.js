@@ -1,13 +1,14 @@
 const axios = require("axios");
 const MARVEL_API = process.env.MARVEL_API;
+const { newComics, allComics } = require("./utils");
 const {
-  charactersComic,
-  creatorsComic,
-  eventsComic,
-  storiesComic,
-  newComics,
-  allComics,
-} = require("./utils");
+  getCharacters,
+  getCreators,
+  getEvents,
+  getStories,
+} = require("../utils");
+
+const type = "comics";
 
 module.exports = {
   async getAllComics(req, res) {
@@ -49,16 +50,16 @@ module.exports = {
           stories = { data: [], available: 0 };
 
         if (data.characters.available) {
-          characters = await charactersComic(data.id);
+          characters = await getCharacters(data.id, {}, type);
         }
         if (data.creators.available) {
-          creators = await creatorsComic(data.id);
+          creators = await getCreators(data.id, {}, type);
         }
         if (data.events.available) {
-          events = await eventsComic(data.id);
+          events = await getEvents(data.id, {}, type);
         }
         if (data.stories.available) {
-          stories = await storiesComic(data.id);
+          stories = await getStories(data.id, {}, type);
         }
         const comicInfo = {
           id: data.id,
@@ -94,9 +95,9 @@ module.exports = {
     if (totalCharacters && page >= 2) {
       tPage = Math.ceil(totalCharacters / limit);
       offset = page >= tPage ? tPage * limit - limit : page * limit - limit;
-      characters = await charactersComic(id, { limit, offset });
+      characters = await getCharacters(id, { limit, offset }, type);
     } else {
-      characters = await charactersComic(id, { limit });
+      characters = await getCharacters(id, { limit }, type);
     }
     res.send(characters);
   },
@@ -112,9 +113,9 @@ module.exports = {
     if (totalCreators && page >= 2) {
       tPage = Math.ceil(totalCreators / limit);
       offset = page >= tPage ? tPage * limit - limit : page * limit - limit;
-      creators = await creatorsComic(id, { limit, offset });
+      creators = await getCreators(id, { limit, offset }, type);
     } else {
-      creators = await creatorsComic(id, { limit });
+      creators = await getCreators(id, { limit }, type);
     }
     res.send(creators);
   },
@@ -130,9 +131,9 @@ module.exports = {
     if (totalEvents && page >= 2) {
       tPage = Math.ceil(totalEvents / limit);
       offset = page >= tPage ? tPage * limit - limit : page * limit - limit;
-      events = await eventsComic(id, { limit, offset });
+      events = await getEvents(id, { limit, offset }, type);
     } else {
-      events = await eventsComic(id, { limit });
+      events = await getEvents(id, { limit }, type);
     }
     res.send(events);
   },
@@ -148,9 +149,9 @@ module.exports = {
     if (totalSeries && page >= 2) {
       tPage = Math.ceil(totalSeries / limit);
       offset = page >= tPage ? tPage * limit - limit : page * limit - limit;
-      stories = await storiesComic(id, { limit, offset });
+      stories = await getStories(id, { limit, offset }, type);
     } else {
-      stories = await storiesComic(id, { limit });
+      stories = await getStories(id, { limit }, type);
     }
     res.send(stories);
   },

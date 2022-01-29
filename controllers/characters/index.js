@@ -1,15 +1,16 @@
 const axios = require("axios");
+const { allCharacters, newCharacters } = require("./utils.js");
+
 const {
-  allCharacters,
-  eventsCharacter,
-  storiesCharacter,
-  seriesCharacter,
-  comicsCharacter,
-  newCharacters,
-} = require("./utils.js");
+  getCharacters,
+  getComics,
+  getEvents,
+  getSeries,
+  getStories,
+} = require("../utils.js");
 
 const MARVEL_API = process.env.MARVEL_API;
-
+let type = "characters";
 module.exports = {
   async getCharacters(req, res) {
     try {
@@ -45,16 +46,16 @@ module.exports = {
           series = { data: [], available: 0 };
 
         if (data.events.available) {
-          events = await eventsCharacter(data.id);
+          events = await getEvents(data.id, {}, type);
         }
         if (data.comics.available) {
-          comics = await comicsCharacter(data.id);
+          comics = await getComics(data.id, {}, type);
         }
         if (data.stories.available) {
-          stories = await storiesCharacter(data.id);
+          stories = await getCharacters(data.id, {}, type);
         }
         if (data.stories.available) {
-          series = await seriesCharacter(data.id);
+          series = await getSeries(data.id, {}, type);
         }
         const characterInfo = {
           id: data.id,
@@ -83,18 +84,15 @@ module.exports = {
     const limit = q.limit && q.limit >= 50 && q.limit <= 100 ? q.limit : 50; // min: 10, max: 100, default: 20
     const page = q.page && q.page > 0 ? q.page : 1; // min:1, max: n, default:1
     const totalComics = isNaN(q.totalComics) ? false : q.totalComics; // min: 1, default: false
-    // totalComics = es: "cómics" en los que aparece el personaje.
-    // totalComics = en: comics in which the character appears.
 
     let offset, tPage;
-    // tPage = es: Total de "paginacion" que tiene los "cómics" de un personaje.
-    // tPage = en: Total "pagination" of a character's "comics".
+
     if (totalComics && page >= 2) {
       tPage = Math.ceil(totalComics / limit);
       offset = page >= tPage ? tPage * limit - limit : page * limit - limit;
-      comics = await comicsCharacter(id, { limit, offset });
+      comics = await getComics(id, { limit, offset }, type);
     } else {
-      comics = await comicsCharacter(id, { limit });
+      comics = await getComics(id, { limit }, type);
     }
     res.send(comics);
   },
@@ -105,18 +103,14 @@ module.exports = {
     const limit = q.limit && q.limit >= 50 && q.limit <= 100 ? q.limit : 50; // min: 10, max: 100, default: 20
     const page = q.page && q.page > 0 ? q.page : 1; // min:1, max: n, default:1
     const totalEvents = isNaN(q.totalEvents) ? "" : q.totalEvents; // min: 1, default: false
-    // totalEvents = es: "eventos" en los que aparece el personaje.
-    // totalEvents = en: events in which the character appears.
 
     let offset, tPage;
-    // tPage = es: Total de "paginacion" que tiene los "eventos" de un personaje.
-    // tPage = en: Total "pagination" of a character's "events".
     if (totalEvents && page >= 2) {
       tPage = Math.ceil(totalEvents / limit);
       offset = page >= tPage ? tPage * limit - limit : page * limit - limit;
-      events = await eventsCharacter(id, { limit, offset });
+      events = await getEvents(id, { limit, offset }, type);
     } else {
-      events = await eventsCharacter(id, { limit });
+      events = await getEvents(id, { limit }, type);
     }
     res.send(events);
   },
@@ -127,18 +121,14 @@ module.exports = {
     const limit = q.limit && q.limit >= 50 && q.limit <= 100 ? q.limit : 50; // min: 50, max: 100, default: 50
     const page = q.page && q.page > 0 ? q.page : 1; // min:1, max: n, default:1
     const totalSeries = isNaN(q.totalSeries) ? "" : q.totalSeries; // min: 1, default: false
-    // totalSeries = es: "Series" en los que aparece el personaje.
-    // totalSeries = en: Series in which the character appears.
 
     let offset, tPage;
-    // tPage = es: Total de "paginacion" que tiene los "Series" de un personaje.
-    // tPage = en: Total "pagination" of a character's "series".
     if (totalSeries && page >= 2) {
       tPage = Math.ceil(totalSeries / limit);
       offset = page >= tPage ? tPage * limit - limit : page * limit - limit;
-      series = await seriesCharacter(id, { limit, offset });
+      series = await getSeries(id, { limit, offset }, type);
     } else {
-      series = await seriesCharacter(id, { limit });
+      series = await getSeries(id, { limit }, type);
     }
     res.send(series);
   },
@@ -150,18 +140,14 @@ module.exports = {
     const limit = q.limit && q.limit >= 50 && q.limit <= 100 ? q.limit : 50; // min: 10, max: 100, default: 20
     const page = q.page && q.page > 0 ? q.page : 1; // min:1, max: n, default:1
     const totalStories = isNaN(q.totalStories) ? "" : q.totalStories; // min: 1, default: false
-    // totalStories = es: "Historias" en los que aparece el personaje.
-    // totalStories = en: Stories in which the character appears.
 
     let offset, tPage;
-    // tPage = es: Total de "paginacion" que tiene los "Historias" de un personaje.
-    // tPage = en: Total "pagination" of a character's "Stories".
     if (totalStories && page >= 2) {
       tPage = Math.ceil(totalStories / limit);
       offset = page >= tPage ? tPage * limit - limit : page * limit - limit;
-      stories = await storiesCharacter(id, { limit, offset });
+      stories = await getStories(id, { limit, offset }, type);
     } else {
-      stories = await storiesCharacter(id, { limit });
+      stories = await getStories(id, { limit }, type);
     }
     res.send(stories);
   },
