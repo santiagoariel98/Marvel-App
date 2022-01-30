@@ -9,6 +9,7 @@ const {
   getWithQuery,
   getTotalPages,
   getById,
+  getSortQueries,
 } = require("../utils");
 
 module.exports = {
@@ -17,12 +18,13 @@ module.exports = {
       const q = req.query;
       const page = q.page > 2 ? q.page : 1;
       const limit = q.limit > 20 ? q.limit : 20;
+      const orderBy = getSortQueries(type, q.orderBy);
 
       const total = +q.total || (await getTotalPages(limit, type));
       const offset =
         page > total ? total * limit - limit : page * limit - limit;
 
-      const events = await getWithQuery({ limit, offset }, type);
+      const events = await getWithQuery({ limit, offset, orderBy }, type);
       res.send({ pages: total, page: offset / limit + 1, ...events });
     } catch (error) {
       res.send({ error: "An error has occurred", success: false }).status(500);

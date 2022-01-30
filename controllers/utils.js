@@ -2,6 +2,9 @@ const axios = require("axios");
 
 const MARVEL_API = process.env.MARVEL_API;
 
+const validateQuery = (arr = [], string = "") => {
+  return arr.some((e) => e == string);
+};
 const convertData = (data, type) => {
   if (type === "characters") {
     return data.map((character) => ({
@@ -53,6 +56,7 @@ const convertData = (data, type) => {
       rating: serie.rating,
       type: serie.type,
       startYear: serie.startYear,
+      title: serie.title,
       endYear: serie.endYear,
       img: serie.thumbnail.path + "." + serie.thumbnail.extension,
       totalCharacters: serie.characters.available,
@@ -238,5 +242,36 @@ module.exports = {
         return pages;
       })
       .catch(() => 1);
+  },
+  getSortQueries(type, sort = "") {
+    let orderBy = "modified";
+    if (type === "characters") {
+      let valid = ["-name", "name", "modified", "-modified"];
+      orderBy = validateQuery(valid, sort) ? sort : "name";
+    } else if (type === "comics") {
+      let valid = ["onsaleDate", "-onsaleDate", "title", "-title"];
+      orderBy = validateQuery(valid, sort) ? sort : "title";
+    } else if (type === "creators") {
+      let valid = [
+        "-lastName",
+        "lastName",
+        "-firstName",
+        "firstName",
+        "modified",
+        "-modified",
+      ];
+      orderBy = validateQuery(valid, sort) ? sort : "firstname";
+    } else if (type === "events") {
+      let valid = ["name", "-name", "startDate", "-startDate"];
+      orderBy = validateQuery(valid, sort) ? sort : "name";
+    } else if (type === "series") {
+      let valid = ["startYear", "-startYear", "title", "-title"];
+      orderBy = validateQuery(valid, sort) ? sort : "title";
+    } else if (type === "stories") {
+      let valid = ["modified", "-modified"];
+      orderBy = validateQuery(valid, sort) ? sort : "modified";
+    }
+
+    return orderBy;
   },
 };
