@@ -10,6 +10,7 @@ const {
   getTotalPages,
   getById,
   getSortQueries,
+  getEvents,
 } = require("../utils");
 
 const MARVEL_API = process.env.MARVEL_API;
@@ -86,111 +87,78 @@ module.exports = {
     }
   },
   async getComicsStorie(req, res) {
-    let comics;
     const { id } = req.params; // ID Personaje/Characters
+    const getType = type + "/" + id + "/" + "comics";
     const q = req.query;
 
-    const limit = q.limit && q.limit >= 50 && q.limit <= 100 ? q.limit : 50; // min: 10, max: 100, default: 20
-    const page = q.page && q.page > 0 ? q.page : 1; // min:1, max: n, default:1
-    const totalComics = isNaN(q.totalComics) ? false : q.totalComics; // min: 1, default: false
-    // totalComics = es: "cómics" en los que aparece el personaje.
-    // totalComics = en: comics in which the character appears.
+    const page = q.page > 1 ? q.page : 1;
+    const limit = q.limit > 50 ? q.limit : 50;
 
-    let offset, tPage;
-    // tPage = es: Total de "paginacion" que tiene los "cómics" de un personaje.
-    // tPage = en: Total "pagination" of a character's "comics".
-    if (totalComics && page >= 2) {
-      tPage = Math.ceil(totalComics / limit);
-      offset = page >= tPage ? tPage * limit - limit : page * limit - limit;
-      comics = await getComics(id, { limit, offset }, type);
-    } else {
-      comics = await getComics(id, { limit }, type);
-    }
-    res.send(comics);
+    const orderBy = getSortQueries("comics", q.orderBy);
+
+    const total = +q.total || (await getTotalPages(limit, getType));
+    const offset = page > total ? total * limit - limit : page * limit - limit;
+    const data = await getComics(id, { limit, offset, orderBy }, type);
+    res.send({ pages: total, page: offset / limit + 1, ...data });
   },
   async getCharactersStorie(req, res) {
-    let comics;
     const { id } = req.params; // ID Personaje/Characters
+    const getType = type + "/" + id + "/" + "characters";
     const q = req.query;
 
-    const limit = q.limit && q.limit >= 50 && q.limit <= 100 ? q.limit : 50; // min: 10, max: 100, default: 20
-    const page = q.page && q.page > 0 ? q.page : 1; // min:1, max: n, default:1
-    const totalCharacters = isNaN(q.totalCharacters)
-      ? false
-      : q.totalCharacters; // min: 1, default: false
-    // totalCharacters = es: "cómics" en los que aparece el personaje.
-    // totalCharacters = en: comics in which the character appears.
+    const page = q.page > 1 ? q.page : 1;
+    const limit = q.limit > 50 ? q.limit : 50;
 
-    let offset, tPage;
-    // tPage = es: Total de "paginacion" que tiene los "cómics" de un personaje.
-    // tPage = en: Total "pagination" of a character's "comics".
-    if (totalCharacters && page >= 2) {
-      tPage = Math.ceil(totalCharacters / limit);
-      offset = page >= tPage ? tPage * limit - limit : page * limit - limit;
-      comics = await getCharacters(id, { limit, offset }, type);
-    } else {
-      comics = await getCharacters(id, { limit }, type);
-    }
-    res.send(comics);
+    const orderBy = getSortQueries("characters", q.orderBy);
+
+    const total = +q.total || (await getTotalPages(limit, getType));
+    const offset = page > total ? total * limit - limit : page * limit - limit;
+    const data = await getCharacters(id, { limit, offset, orderBy }, type);
+    res.send({ pages: total, page: offset / limit + 1, ...data });
   },
   async getCreatorsStorie(req, res) {
     const { id } = req.params; // ID Personaje/Characters
+    const getType = type + "/" + id + "/" + "creators";
     const q = req.query;
-    let events;
-    const limit = q.limit && q.limit >= 50 && q.limit <= 100 ? q.limit : 50; // min: 10, max: 100, default: 20
-    const page = q.page && q.page > 0 ? q.page : 1; // min:1, max: n, default:1
-    const totalCreators = isNaN(q.totalCreators) ? "" : q.totalCreators; // min: 1, default: false
-    // totalCreators = es: "eventos" en los que aparece el personaje.
-    // totalCreators = en: events in which the character appears.
 
-    let offset, tPage;
-    // tPage = es: Total de "paginacion" que tiene los "eventos" de un personaje.
-    // tPage = en: Total "pagination" of a character's "events".
-    if (totalCreators && page >= 2) {
-      tPage = Math.ceil(totalCreators / limit);
-      offset = page >= tPage ? tPage * limit - limit : page * limit - limit;
-      events = await getCreators(id, { limit, offset }, type);
-    } else {
-      events = await getCreators(id, { limit }, type);
-    }
-    res.send(events);
+    const page = q.page > 1 ? q.page : 1;
+    const limit = q.limit > 50 ? q.limit : 50;
+
+    const orderBy = getSortQueries("creators", q.orderBy);
+
+    const total = +q.total || (await getTotalPages(limit, getType));
+    const offset = page > total ? total * limit - limit : page * limit - limit;
+    const data = await getCreators(id, { limit, offset, orderBy }, type);
+    res.send({ pages: total, page: offset / limit + 1, ...data });
   },
   async getEventsStorie(req, res) {
     const { id } = req.params; // ID Personaje/Characters
+    const getType = type + "/" + id + "/" + "events";
     const q = req.query;
-    let events;
-    const limit = q.limit && q.limit >= 50 && q.limit <= 100 ? q.limit : 50; // min: 50, max: 100, default: 50
-    const page = q.page && q.page > 0 ? q.page : 1; // min:1, max: n, default:1
-    const totalEvents = isNaN(q.totalEvents) ? "" : q.totalEvents; // min: 1, default: false
 
-    let offset, tPage;
+    const page = q.page > 1 ? q.page : 1;
+    const limit = q.limit > 50 ? q.limit : 50;
 
-    if (totalEvents && page >= 2) {
-      tPage = Math.ceil(totalEvents / limit);
-      offset = page >= tPage ? tPage * limit - limit : page * limit - limit;
-      events = await getEvents(id, { limit, offset }, type);
-    } else {
-      events = await getEvents(id, { limit }, type);
-    }
-    res.send(events);
+    const orderBy = getSortQueries("events", q.orderBy);
+
+    const total = +q.total || (await getTotalPages(limit, getType));
+    const offset = page > total ? total * limit - limit : page * limit - limit;
+    const data = await getEvents(id, { limit, offset, orderBy }, type);
+    res.send({ pages: total, page: offset / limit + 1, ...data });
   },
-
   async getSeriesStorie(req, res) {
     const { id } = req.params; // ID Personaje/Characters
+    const getType = type + "/" + id + "/" + "series";
     const q = req.query;
-    let series;
-    const limit = q.limit && q.limit >= 50 && q.limit <= 100 ? q.limit : 50; // min: 10, max: 100, default: 20
-    const page = q.page && q.page > 0 ? q.page : 1; // min:1, max: n, default:1
-    const totalStories = isNaN(q.totalStories) ? "" : q.totalStories; // min: 1, default: false
 
-    let offset, tPage;
-    if (totalStories && page >= 2) {
-      tPage = Math.ceil(totalStories / limit);
-      offset = page >= tPage ? tPage * limit - limit : page * limit - limit;
-      series = await getSeries(id, { limit, offset }, type);
-    } else {
-      series = await getSeries(id, { limit }, type);
-    }
-    res.send(series);
+    const page = q.page > 1 ? q.page : 1;
+    const limit = q.limit > 50 ? q.limit : 50;
+
+    const orderBy = getSortQueries("series", q.orderBy);
+
+    const total = +q.total || (await getTotalPages(limit, getType));
+    const offset = page > total ? total * limit - limit : page * limit - limit;
+    const data = await getSeries(id, { limit, offset, orderBy }, type);
+    res.send({ pages: total, page: offset / limit + 1, ...data });
   },
 };

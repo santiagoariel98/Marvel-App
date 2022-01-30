@@ -2,6 +2,12 @@ const axios = require("axios");
 
 const MARVEL_API = process.env.MARVEL_API;
 
+const getValuesQueries = (obj = {}) => {
+  return Object.entries(obj)
+    .map((params) => params.join("="))
+    .join("&");
+};
+
 const validateQuery = (arr = [], string = "") => {
   return arr.some((e) => e == string);
 };
@@ -102,11 +108,10 @@ module.exports = {
       .catch(() => ({ data: [], available: 0 }));
   },
   getComics(id, params = {}, type) {
-    const limit = params.limit || 20;
-    const offset = params.offset || 0;
+    const queries = getValuesQueries(params);
     return axios
       .get(
-        `https://gateway.marvel.com/v1/public/${type}/${id}/comics${MARVEL_API}&limit=${limit}&offset=${offset}`
+        `https://gateway.marvel.com/v1/public/${type}/${id}/comics${MARVEL_API}&${queries}`
       )
       .then(({ data }) => {
         const comics = data.data.results;
@@ -120,14 +125,14 @@ module.exports = {
         }));
         return { data: result, available };
       })
-      .catch(() => ({ data: [], available: 0 }));
+      .catch((err) => ({ data: [], available: 0 }));
   },
   getCreators(id, params = {}, type) {
-    const limit = params.limit || 20;
-    const offset = params.offset || 0;
+    const queries = getValuesQueries(params);
+
     return axios
       .get(
-        `https://gateway.marvel.com/v1/public/${type}/${id}/creators${MARVEL_API}&limit=${limit}&offset=${offset}`
+        `https://gateway.marvel.com/v1/public/${type}/${id}/creators${MARVEL_API}&${queries}`
       )
       .then(({ data }) => {
         const creators = data.data.results;
@@ -143,12 +148,11 @@ module.exports = {
       .catch(() => ({ data: [], available: 0 }));
   },
   getEvents(id, params = {}, type) {
-    const limit = params.limit || 20;
-    const offset = params.offset || 0;
+    const queries = getValuesQueries(params);
 
     return axios
       .get(
-        `https://gateway.marvel.com/v1/public/${type}/${id}/events${MARVEL_API}&limit=${limit}&offset=${offset}`
+        `https://gateway.marvel.com/v1/public/${type}/${id}/events${MARVEL_API}&${queries}`
       )
       .then(({ data }) => {
         const events = data.data.results;
@@ -165,11 +169,11 @@ module.exports = {
   },
 
   getStories(id, params = {}, type) {
-    const limit = params.limit || 20;
-    const offset = params.offset || 0;
+    const queries = getValuesQueries(params);
+
     return axios
       .get(
-        `https://gateway.marvel.com/v1/public/${type}/${id}/stories${MARVEL_API}&limit=${limit}&offset=${offset}`
+        `https://gateway.marvel.com/v1/public/${type}/${id}/stories${MARVEL_API}&${queries}`
       )
       .then(({ data }) => {
         const stories = data.data.results;
@@ -185,11 +189,11 @@ module.exports = {
       .catch(() => ({ data: [], available: 0 }));
   },
   getSeries(id, params = {}, type) {
-    const limit = params.limit || 20;
-    const offset = params.offset || 0;
+    const queries = getValuesQueries(params);
+
     return axios
       .get(
-        `https://gateway.marvel.com/v1/public/${type}/${id}/series${MARVEL_API}&limit=${limit}&offset=${offset}`
+        `https://gateway.marvel.com/v1/public/${type}/${id}/series${MARVEL_API}&${queries}`
       )
       .then(({ data }) => {
         const series = data.data.results;
@@ -215,9 +219,8 @@ module.exports = {
       }));
   },
   getWithQuery(options = {}, type) {
-    const queries = Object.entries(options)
-      .map((params) => params.join("="))
-      .join("&");
+    const queries = getValuesQueries(options);
+
     return axios
       .get(
         `https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&${queries}`
@@ -241,7 +244,9 @@ module.exports = {
         const pages = items / limit > 1 ? Math.ceil(items / limit) : 1;
         return pages;
       })
-      .catch(() => 1);
+      .catch((err) => {
+        return 1;
+      });
   },
   getSortQueries(type, sort = "") {
     let orderBy = "modified";
