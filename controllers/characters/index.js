@@ -1,5 +1,4 @@
-const axios = require("axios");
-const { allCharacters, newCharacters } = require("./utils.js");
+const type = "characters";
 
 const {
   getCharacters,
@@ -7,74 +6,75 @@ const {
   getEvents,
   getSeries,
   getStories,
+  getById,
+  getWithQuery,
+  getTotalPages,
 } = require("../utils.js");
 
-const MARVEL_API = process.env.MARVEL_API;
-let type = "characters";
 module.exports = {
   async getCharacters(req, res) {
     try {
       const q = req.query;
-      const page = q.page && q.page > 0 ? q.page : 1; // min:1, max: n, default:1
+      const page = q.page > 2 ? q.page : 1;
+      const limit = q.limit > 20 ? q.limit : 20;
 
-      const limit = 20; // limit item per page
-      const offset = page > 77 ? 1540 : limit * page - limit; // 1540 total Characters
-      const characters = await allCharacters({ limit, offset });
-      res.send({ data: characters, success: true });
+      const total = +q.total || (await getTotalPages(limit, type));
+      const offset =
+        page > total ? total * limit - limit : page * limit - limit;
+
+      const characters = await getWithQuery({ limit, offset }, type);
+      res.send({ pages: total, page: offset / limit + 1, ...characters });
     } catch (error) {
       res.send({ error: "An error has occurred", success: false }).status(500);
     }
   },
   async getNewCharacters(req, res) {
     try {
-      const characters = await newCharacters();
-      res.send({ data: characters, success: true });
+      const characters = await getWithQuery(
+        { orderBy: "-modified", limit: 10 },
+        type
+      );
+      res.send(characters);
     } catch (error) {
       res.send({ error: "An error has occurred", success: false }).status(500);
     }
   },
-
-  getCharacterById(req, res) {
+  async getCharacterById(req, res) {
     const { id } = req.params;
-    axios
-      .get(`https://gateway.marvel.com/v1/public/characters/${id}${MARVEL_API}`)
-      .then(async ({ data }) => {
-        data = data.data.results[0]; // data request
-        let events = { data: [], available: 0 },
-          comics = { data: [], available: 0 },
-          stories = { data: [], available: 0 },
-          series = { data: [], available: 0 };
 
-        if (data.events.available) {
-          events = await getEvents(data.id, {}, type);
-        }
-        if (data.comics.available) {
-          comics = await getComics(data.id, {}, type);
-        }
-        if (data.stories.available) {
-          stories = await getCharacters(data.id, {}, type);
-        }
-        if (data.stories.available) {
-          series = await getSeries(data.id, {}, type);
-        }
-        const characterInfo = {
-          id: data.id,
-          name: data.name,
-          img: data.thumbnail.path + "." + data.thumbnail.extension,
-          series,
-          comics,
-          events,
-          stories,
-        };
+    let events = { data: [], available: 0 },
+      comics = { data: [], available: 0 },
+      stories = { data: [], available: 0 },
+      series = { data: [], available: 0 };
 
-        res.send({
-          data: characterInfo,
-          success: true,
-        });
-      })
-      .catch((err) => {
-        res.send({ error: "Characters not found", success: false }).status(404);
-      });
+    const character = await getById(id, type);
+    if (character.success) {
+      let data = character.data;
+      if (data.events.available) {
+        events = await getEvents(id, { limit: 10 }, type);
+      }
+      if (data.comics.available) {
+        comics = await getComics(id, { limit: 10 }, type);
+      }
+      if (data.stories.available) {
+        stories = await getCharacters(id, { limit: 10 }, type);
+      }
+      if (data.stories.available) {
+        series = await getSeries(id, { limit: 10 }, type);
+      }
+      const characterInfo = {
+        id: id,
+        name: data.name,
+        img: data.thumbnail.path + "." + data.thumbnail.extension,
+        series,
+        comics,
+        events,
+        stories,
+      };
+      res.send({ ...character, data: characterInfo });
+    } else {
+      res.send(character);
+    }
   },
   async getComicsCharacter(req, res) {
     let comics;

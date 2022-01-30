@@ -1,6 +1,3 @@
-const axios = require("axios");
-const MARVEL_API = process.env.MARVEL_API;
-const { allEvents, newEvents } = require("./utils");
 const type = "events";
 
 const {
@@ -9,87 +6,84 @@ const {
   getCreators,
   getSeries,
   getStories,
+  getWithQuery,
+  getTotalPages,
+  getById,
 } = require("../utils");
 
 module.exports = {
   async getAllEvents(req, res) {
     try {
       const q = req.query;
-      const page = q.page && q.page > 0 ? q.page : 1; // min:1, max: n, default:1
+      const page = q.page > 2 ? q.page : 1;
+      const limit = q.limit > 20 ? q.limit : 20;
 
-      const limit = 20; // limit item per page
-      const offset = page > 3 ? 60 : limit * page - limit; // 50921 total Comics
-      const events = await allEvents({ limit, offset });
-      console.log(limit, offset);
-      res.send({ data: events, success: true });
+      const total = +q.total || (await getTotalPages(limit, type));
+      const offset =
+        page > total ? total * limit - limit : page * limit - limit;
+
+      const events = await getWithQuery({ limit, offset }, type);
+      res.send({ pages: total, page: offset / limit + 1, ...events });
     } catch (error) {
       res.send({ error: "An error has occurred", success: false }).status(500);
     }
   },
   async getNewEvents(req, res) {
     try {
-      const q = req.query;
-      const page = q.page && q.page > 0 ? q.page : 1; // min:1, max: n, default:1
-
-      const limit = 20; // limit item per page
-      const offset = page > 3 ? 60 : limit * page - limit; // 50921 total Comics
-      const events = await newEvents();
-      res.send({ data: events, success: true });
+      const events = await getWithQuery(
+        { orderBy: "-modified", limit: 10 },
+        type
+      );
+      res.send(events);
     } catch (error) {
       res.send({ error: "An error has occurred", success: false }).status(500);
     }
   },
   async getEventById(req, res) {
     const { id } = req.params;
-    axios
-      .get(`https://gateway.marvel.com/v1/public/events/${id}${MARVEL_API}`)
-      .then(async ({ data }) => {
-        data = data.data.results[0]; // data request
-        let characters = { data: [], available: 0 },
-          comics = { data: [], available: 0 },
-          creators = { data: [], available: 0 },
-          series = { data: [], available: 0 },
-          stories = { data: [], available: 0 };
+    let characters = { data: [], available: 0 },
+      comics = { data: [], available: 0 },
+      creators = { data: [], available: 0 },
+      series = { data: [], available: 0 },
+      stories = { data: [], available: 0 };
+    const events = await getById(id, type);
 
-        if (data.characters.available) {
-          characters = await getCharacters(data.id, {}, type);
-        }
-        if (data.comics.available) {
-          comics = await getComics(data.id, {}, type);
-        }
-        if (data.creators.available) {
-          creators = await getCreators(data.id, {}, type);
-        }
-        if (data.series.available) {
-          series = await getSeries(data.id, {}, type);
-        }
-        if (data.stories.available) {
-          stories = await getStories(data.id, {}, type);
-        }
-        const eventInfo = {
-          id: data.id,
-          title: data.title,
-          startAndEnd: {
-            start: data.start,
-            end: data.end,
-          },
-          next: data.next.name,
-          previous: data.previous.name,
-          desc: data.description,
-          characters,
-          comics,
-          creators,
-          stories,
-        };
-        res.send({
-          data: eventInfo,
-          success: true,
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-        res.send({ error: "Event not found", success: false }).status(404);
-      });
+    if (events.success) {
+      const data = events.data;
+      if (data.characters.available) {
+        characters = await getCharacters(data.id, {}, type);
+      }
+      if (data.comics.available) {
+        comics = await getComics(data.id, {}, type);
+      }
+      if (data.creators.available) {
+        creators = await getCreators(data.id, {}, type);
+      }
+      if (data.series.available) {
+        series = await getSeries(data.id, {}, type);
+      }
+      if (data.stories.available) {
+        stories = await getStories(data.id, {}, type);
+      }
+      const eventInfo = {
+        id: data.id,
+        title: data.title,
+        startAndEnd: {
+          start: data.start,
+          end: data.end,
+        },
+        next: data.next.name,
+        previous: data.previous.name,
+        desc: data.description,
+        characters,
+        comics,
+        creators,
+        stories,
+      };
+      res.send({ ...events, data: eventInfo });
+    } else {
+      res.send(events).status(400);
+    }
   },
   async getCharactersEvent(req, res) {
     let characters;

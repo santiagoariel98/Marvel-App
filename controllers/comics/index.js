@@ -1,85 +1,81 @@
-const axios = require("axios");
-const MARVEL_API = process.env.MARVEL_API;
-const { newComics, allComics } = require("./utils");
+const type = "comics";
+
 const {
   getCharacters,
   getCreators,
   getEvents,
   getStories,
+  getWithQuery,
+  getTotalPages,
+  getById,
 } = require("../utils");
-
-const type = "comics";
 
 module.exports = {
   async getAllComics(req, res) {
     try {
       const q = req.query;
-      const page = q.page && q.page > 0 ? q.page : 1; // min:1, max: n, default:1
+      const page = q.page > 2 ? q.page : 1;
+      const limit = q.limit > 20 ? q.limit : 20;
 
-      const limit = 20; // limit item per page
-      const offset = page > 2546 ? 50920 : limit * page - limit; // 50921 total Comics
-      const characters = await allComics({ limit, offset });
-      console.log(limit, offset);
-      res.send({ data: characters, success: true });
+      const total = +q.total || (await getTotalPages(limit, type));
+
+      const offset =
+        page > total ? total * limit - limit : page * limit - limit;
+
+      const comics = await getWithQuery({ limit, offset }, type);
+      res.send({ pages: total, page: offset / limit + 1, ...comics });
     } catch (error) {
       res.send({ error: "An error has occurred", success: false }).status(500);
     }
   },
   async getNewComics(req, res) {
     try {
-      const q = req.query;
-      const page = q.page && q.page > 0 ? q.page : 1; // min:1, max: n, default:1
-
-      const limit = 20; // limit item per page
-      const offset = page > 2546 ? 50920 : limit * page - limit; // 50921 total Comics
-      const comics = await newComics();
-      res.send({ data: comics, success: true });
+      const comics = await getWithQuery(
+        { orderBy: "-modified", limit: 10 },
+        type
+      );
+      res.send(comics);
     } catch (error) {
       res.send({ error: "An error has occurred", success: false }).status(500);
     }
   },
   async getComicById(req, res) {
     const { id } = req.params;
-    axios
-      .get(`https://gateway.marvel.com/v1/public/comics/${id}${MARVEL_API}`)
-      .then(async ({ data }) => {
-        data = data.data.results[0]; // data request
-        let characters = { data: [], available: 0 },
-          creators = { data: [], available: 0 },
-          events = { data: [], available: 0 },
-          stories = { data: [], available: 0 };
+    let characters = { data: [], available: 0 },
+      creators = { data: [], available: 0 },
+      events = { data: [], available: 0 },
+      stories = { data: [], available: 0 };
 
-        if (data.characters.available) {
-          characters = await getCharacters(data.id, {}, type);
-        }
-        if (data.creators.available) {
-          creators = await getCreators(data.id, {}, type);
-        }
-        if (data.events.available) {
-          events = await getEvents(data.id, {}, type);
-        }
-        if (data.stories.available) {
-          stories = await getStories(data.id, {}, type);
-        }
-        const comicInfo = {
-          id: data.id,
-          title: data.title,
-          img: data.thumbnail.path + "." + data.thumbnail.extension,
-          pageCount: data.pageCount,
-          dates: data.dates.filter((date) => date.type === "onsaleDate")[0],
-          characters,
-          creators,
-          events,
-          stories,
-        };
-        res.send({
-          data: comicInfo,
-          success: true,
-        });
-      })
-      .catch((err) => {
-        res.send({ error: "Comic not found", success: false }).status(404);
-      });
+    const comic = await getById(id, type);
+    if (comic.success) {
+      let data = comic.data;
+      if (data.characters.available) {
+        characters = await getCharacters(data.id, {}, type);
+      }
+      if (data.creators.available) {
+        creators = await getCreators(data.id, {}, type);
+      }
+      if (data.events.available) {
+        events = await getEvents(data.id, {}, type);
+      }
+      if (data.stories.available) {
+        stories = await getStories(data.id, {}, type);
+      }
+      const comicInfo = {
+        id: data.id,
+        title: data.title,
+        img: data.thumbnail.path + "." + data.thumbnail.extension,
+        pageCount: data.pageCount,
+        dates: data.dates.filter((date) => date.type === "onsaleDate")[0],
+        characters,
+        creators,
+        events,
+        stories,
+      };
+      res.send({ ...comic, data: comicInfo });
+    } else {
+      res.send(character);
+    }
   },
   async getCharactersComic(req, res) {
     let characters;

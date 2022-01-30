@@ -24,4 +24,5 @@ router.get("/:id/events", charactersController.getEventsCharacter);
 router.get("/:id/series", charactersController.getSeriesCharacter);
 // get character stories
 router.get("/:id/stories", charactersController.getStoriesCharacter);
+
 module.exports = router;
