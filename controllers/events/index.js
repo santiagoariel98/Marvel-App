@@ -53,19 +53,19 @@ module.exports = {
     if (events.success) {
       const data = events.data;
       if (data.characters.available) {
-        characters = await getCharacters(data.id, {}, type);
+        characters = await getCharacters(data.id, { limit: 10 }, type);
       }
       if (data.comics.available) {
-        comics = await getComics(data.id, {}, type);
+        comics = await getComics(data.id, { limit: 10 }, type);
       }
       if (data.creators.available) {
-        creators = await getCreators(data.id, {}, type);
+        creators = await getCreators(data.id, { limit: 10 }, type);
       }
       if (data.series.available) {
-        series = await getSeries(data.id, {}, type);
+        series = await getSeries(data.id, { limit: 10 }, type);
       }
       if (data.stories.available) {
-        stories = await getStories(data.id, {}, type);
+        stories = await getStories(data.id, { limit: 10 }, type);
       }
       const eventInfo = {
         id: data.id,

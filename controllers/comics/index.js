@@ -25,7 +25,6 @@ module.exports = {
       const comics = await getWithQuery({ limit, offset, orderBy }, type);
       res.send({ pages: total, page: offset / limit + 1, ...comics });
     } catch (error) {
-      console.log(error);
       res.send({ error: "An error has occurred", success: false }).status(500);
     }
   },
@@ -51,16 +50,16 @@ module.exports = {
     if (comic.success) {
       let data = comic.data;
       if (data.characters.available) {
-        characters = await getCharacters(data.id, {}, type);
+        characters = await getCharacters(data.id, { limit: 10 }, type);
       }
       if (data.creators.available) {
-        creators = await getCreators(data.id, {}, type);
+        creators = await getCreators(data.id, { limit: 10 }, type);
       }
       if (data.events.available) {
-        events = await getEvents(data.id, {}, type);
+        events = await getEvents(data.id, { limit: 10 }, type);
       }
       if (data.stories.available) {
-        stories = await getStories(data.id, {}, type);
+        stories = await getStories(data.id, { limit: 10 }, type);
       }
       const comicInfo = {
         id: data.id,

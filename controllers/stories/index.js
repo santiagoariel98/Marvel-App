@@ -13,8 +13,6 @@ const {
   getEvents,
 } = require("../utils");
 
-const MARVEL_API = process.env.MARVEL_API;
-
 module.exports = {
   async getAllStories(req, res) {
     try {
@@ -56,19 +54,19 @@ module.exports = {
     if (storie.success) {
       const data = storie.data;
       if (data.characters.available) {
-        characters = await getCharacters(data.id, {}, type);
+        characters = await getCharacters(data.id, { limit: 10 }, type);
       }
       if (data.comics.available) {
-        comics = await getComics(data.id, {}, type);
+        comics = await getComics(data.id, { limit: 10 }, type);
       }
       if (data.creators.available) {
-        creators = await getCreators(data.id, {}, type);
+        creators = await getCreators(data.id, { limit: 10 }, type);
       }
       if (data.series.available) {
-        series = await getSeries(data.id, {}, type);
+        series = await getSeries(data.id, { limit: 10 }, type);
       }
       if (data.events.available) {
-        events = await getEvents(data.id, {}, type);
+        events = await getEvents(data.id, { limit: 10 }, type);
       }
       const storieInfo = {
         id: data.id,
