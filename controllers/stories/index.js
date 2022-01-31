@@ -13,6 +13,8 @@ const {
   getEvents,
 } = require("../utils");
 
+const { getInfo, getListsOfDataFromAnId } = require("../newUtils");
+
 module.exports = {
   async getAllStories(req, res) {
     const q = req.query;

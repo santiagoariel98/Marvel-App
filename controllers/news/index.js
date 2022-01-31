@@ -6,7 +6,7 @@ const {
   getWithQuery,
 } = require("../utils");
 
-const { getInfo, getInfoById, getListsOfDataFromAnId } = require("../newUtils");
+const { getInfo, getListsOfDataFromAnId } = require("../newUtils");
 
 module.exports = {
   async pruebra(req, res) {

@@ -11,6 +11,7 @@ const {
   getSortQueries,
 } = require("../utils");
 const { getListsOfDataFromAnId, getInfo } = require("../newUtils");
+
 module.exports = {
   async getAllComics(req, res) {
     const q = req.query;

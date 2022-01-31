@@ -1,5 +1,6 @@
 const axios = require("axios");
 const res = require("express/lib/response");
+const events = require("./events");
 const MARVEL_API = process.env.MARVEL_API;
 
 const convertData = (data, dataType) => {
@@ -207,7 +208,9 @@ const getTotalPages = (type, limit) => {
 };
 const getTotalPagesOfDataList = (id, type, dataType = "", limit) => {
   return axios
-    .get(`https://gateway.marvel.com/v1/public/${type}/${id}${MARVEL_API}`)
+    .get(
+      `https://gateway.marvel.com/v1/public/${type}/${id}${MARVEL_API}&limit=1`
+    )
     .then(({ data }) => {
       let items = 1;
       const result = data.data.results[0]; // total items
@@ -221,6 +224,10 @@ const getTotalPagesOfDataList = (id, type, dataType = "", limit) => {
     .catch((err) => {
       throw new Error("Descripción del error");
     });
+};
+const totalPages = (items, limit) => {
+  const pages = items / limit > 1 ? Math.ceil(items / limit) : 1;
+  return pages;
 };
 const getValidQueries = (datatype, q = {}) => {
   if (!datatype) {
@@ -270,21 +277,19 @@ module.exports = {
         };
       });
   },
-  async getInfoById(id, type) {
-    return axios
-      .get(`https://gateway.marvel.com/v1/public/${type}/${id}${MARVEL_API}`)
-      .then(({ data }) => ({ success: true, data: data.data.results[0] }))
-      .catch(() => ({
-        success: false,
-        error: `${type.slice(0, -1)} not found`,
-      }));
-  },
+
   async getListsOfDataFromAnId(id, type, q = {}, dataType) {
     try {
       const limit = q.limit || 20;
       const page = q.page > 1 ? Math.ceil(q.page) : 1;
-      const pages = await getTotalPagesOfDataList(id, type, dataType, limit);
-      console.log(pages);
+      const items = q.items || false;
+      let pages;
+      if (items) {
+        pages = pages = items / limit > 1 ? Math.ceil(items / limit) : 1;
+      } else {
+        pages = await getTotalPagesOfDataList(id, type, dataType, limit);
+      }
+
       const offset = page > pages ? pages * limit - 20 : page * limit - 20;
 
       const queries = getValidQueries(q);
@@ -308,7 +313,7 @@ module.exports = {
           return { success: false, error: `${type.slice(0, -1)} ID invalid` };
         });
     } catch (error) {
-      return { success: false, error: `${type.slice(0, -1)} ID invalidss` };
+      return { success: false, error: `${type.slice(0, -1)} ID invalid` };
     }
   },
 };

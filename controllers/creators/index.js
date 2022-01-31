@@ -10,6 +10,7 @@ const {
   getTotalPages,
   getSortQueries,
 } = require("../utils");
+const { getInfo, getListsOfDataFromAnId } = require("../newUtils");
 
 module.exports = {
   async getAllCreators(req, res) {
