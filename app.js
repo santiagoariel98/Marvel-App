@@ -14,7 +14,7 @@ var creatorsRouter = require("./routes/creators");
 var eventsRouter = require("./routes/events");
 var seriesRouter = require("./routes/series");
 var storiesRouter = require("./routes/stories");
-
+var newsRouter = require("./routes/news");
 var app = express();
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -34,6 +34,7 @@ app.use("/api/creators", creatorsRouter);
 app.use("/api/events", eventsRouter);
 app.use("/api/series", seriesRouter);
 app.use("/api/stories", storiesRouter);
+app.use("/api/news/", newsRouter);
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));

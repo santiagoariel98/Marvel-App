@@ -2,6 +2,33 @@ const axios = require("axios");
 
 const MARVEL_API = process.env.MARVEL_API;
 
+const getCurrentDate = () => {
+  return new Date().toISOString().split("T")[0];
+};
+const getLastWeek = () => {
+  let today = new Date();
+  let lastWeek = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() - 7
+  );
+  return lastWeek.toISOString().split("T")[0];
+};
+const getNextWeek = () => {
+  let today = new Date();
+  let lastWeek = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() + 8
+  );
+  return lastWeek.toISOString().split("T")[0];
+};
+const getNextDay = () => {
+  let today = new Date();
+  return new Date(today.getTime() + 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split("T")[0];
+};
 const getValuesQueries = (obj = {}) => {
   return Object.entries(obj)
     .map((params) => params.join("="))
@@ -28,6 +55,7 @@ const convertData = (data, type) => {
       title: comic.title,
       img: comic.thumbnail.path + "." + comic.thumbnail.extension,
       desc: comic.description,
+      onsale: comic.dates.filter((date) => date.type === "onsaleDate")[0].date,
       totalCharacters: comic.characters.available,
       totalCreators: comic.creators.available,
       totalEvents: comic.events.available,
@@ -220,7 +248,6 @@ module.exports = {
   },
   getWithQuery(options = {}, type) {
     const queries = getValuesQueries(options);
-
     return axios
       .get(
         `https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&${queries}`
@@ -231,10 +258,12 @@ module.exports = {
 
         return { success: true, data: result };
       })
-      .catch(() => ({
-        success: false,
-        error: `${type.slice(0, -1)} not found`,
-      }));
+      .catch((err) => {
+        return {
+          success: false,
+          error: `${type.slice(0, -1)} not found`,
+        };
+      });
   },
   async getTotalPages(limit = 20, type) {
     return axios
@@ -265,7 +294,7 @@ module.exports = {
         "modified",
         "-modified",
       ];
-      orderBy = validateQuery(valid, sort) ? sort : "firstname";
+      orderBy = validateQuery(valid, sort) ? sort : "firstName";
     } else if (type === "events") {
       let valid = ["name", "-name", "startDate", "-startDate"];
       orderBy = validateQuery(valid, sort) ? sort : "name";
@@ -278,5 +307,57 @@ module.exports = {
     }
 
     return orderBy;
+  },
+  async newsComics(type) {
+    const today = getCurrentDate();
+    const lastWeek = getLastWeek();
+    return axios
+      .get(
+        `https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&dateRange=${lastWeek},${today}&noVariants=true&limit=15&orderBy=-onsaleDate`
+      )
+      .then(({ data }) => {
+        data = data.data.results;
+        const result = convertData(data, type);
+
+        return { success: true, data: result };
+      })
+      .catch(() => ({
+        success: false,
+        error: "Error",
+      }));
+  },
+  async getNextReleases(type) {
+    const nextDay = getNextDay();
+    const nextWeek = getNextWeek();
+    return axios
+      .get(
+        `https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&dateRange=${nextDay},${nextWeek}&noVariants=true&limit=15&orderBy=-onsaleDate`
+      )
+      .then(({ data }) => {
+        data = data.data.results;
+        const result = convertData(data, type);
+
+        return { success: true, data: result };
+      })
+      .catch(() => ({
+        success: false,
+        error: "Error",
+      }));
+  },
+  async newsCharacters() {
+    return axios
+      .get(
+        `https://gateway.marvel.com/v1/public/characters${MARVEL_API}&orderBy=-modified&comics=84159,13809,12168,94943,17296,90374,84236,93354,37633,37064`
+      )
+      .then(({ data }) => {
+        data = data.data.results;
+        const result = convertData(data, "characters");
+
+        return { success: true, data: result };
+      })
+      .catch(() => ({
+        success: false,
+        error: "Error",
+      }));
   },
 };
