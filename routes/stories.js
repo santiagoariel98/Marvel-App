@@ -7,8 +7,6 @@ var storiesController = require("../controllers/stories/");
 
 router.get("/", storiesController.getAllStories);
 
-router.get("/news", storiesController.getNewStories);
-
 router.get("/:id", storiesController.getStorieById);
 
 router.get("/:id/comics", storiesController.getComicsStorie);

@@ -1,70 +1,33 @@
 const axios = require("axios");
-
 const MARVEL_API = process.env.MARVEL_API;
-const getType = (str = "") => {
-  const split = str.split("/");
-  return split[split.length - 1];
-};
-const getCurrentDate = () => {
-  return new Date().toISOString().split("T")[0];
-};
-const getLastWeek = () => {
-  let today = new Date();
-  let lastWeek = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate() - 7
-  );
-  return lastWeek.toISOString().split("T")[0];
-};
-const getNextWeek = () => {
-  let today = new Date();
-  let lastWeek = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate() + 8
-  );
-  return lastWeek.toISOString().split("T")[0];
-};
-const getNextDay = () => {
-  let today = new Date();
-  return new Date(today.getTime() + 24 * 60 * 60 * 1000)
-    .toISOString()
-    .split("T")[0];
-};
-const getValuesQueries = (obj = {}) => {
-  return Object.entries(obj)
-    .map((params) => params.join("="))
-    .join("&");
-};
 
-const validateQuery = (arr = [], string = "") => {
-  return arr.some((e) => e == string);
-};
-const convertData = (data, type) => {
-  if (type === "characters") {
+const convertData = (data, dataType) => {
+  if (dataType === "characters") {
     return data.map((character) => ({
       id: character.id,
       name: character.name,
       img: character.thumbnail.path + "." + character.thumbnail.extension,
+      desc: character.description,
       totalComics: character.comics.available,
       totalEvents: character.events.available,
       totalSeries: character.series.available,
       totalStories: character.stories.available,
     }));
-  } else if (type === "comics") {
+  } else if (dataType === "comics") {
     return data.map((comic) => ({
       id: comic.id,
       title: comic.title,
       img: comic.thumbnail.path + "." + comic.thumbnail.extension,
       desc: comic.description,
+      price: comic.prices.filter((price) => price.type === "printPrice")[0]
+        .price,
       onsale: comic.dates.filter((date) => date.type === "onsaleDate")[0].date,
       totalCharacters: comic.characters.available,
       totalCreators: comic.creators.available,
       totalEvents: comic.events.available,
       totalStories: comic.stories.available,
     }));
-  } else if (type === "creators") {
+  } else if (dataType === "creators") {
     return data.map((creator) => ({
       id: creator.id,
       fullname: creator.fullName,
@@ -74,7 +37,7 @@ const convertData = (data, type) => {
       totalSeries: creator.series.available,
       totalStories: creator.stories.available,
     }));
-  } else if (type === "events") {
+  } else if (dataType === "events") {
     return data.map((event) => ({
       id: event.id,
       desc: event.description,
@@ -86,7 +49,7 @@ const convertData = (data, type) => {
       totalSeries: event.series.available,
       totalStories: event.stories.available,
     }));
-  } else if (type === "series") {
+  } else if (dataType === "series") {
     return data.map((serie) => ({
       id: serie.id,
       desc: serie.description,
@@ -102,7 +65,7 @@ const convertData = (data, type) => {
       totalEvents: serie.events.available,
       totalStories: serie.stories.available,
     }));
-  } else if (type === "stories") {
+  } else if (dataType === "stories") {
     return data.map((storie) => ({
       id: storie.id,
       desc: storie.desc,
@@ -117,152 +80,240 @@ const convertData = (data, type) => {
   }
 };
 
+const getValidFilter = (datatype, options = {}) => {
+  newOptions = {};
+  if (
+    datatype === "characters" ||
+    datatype === "creators" ||
+    datatype === "events"
+  ) {
+    if (options.nameStartsWith) {
+      let nameStart = "%" + options.nameStartsWith;
+      newOptions = { ...newOptions, nameStart };
+    }
+  } else if (datatype === "comics") {
+    if (options.format) {
+      let format = options.format;
+      let validOptions = [
+        "comic",
+        "infinite comic",
+        "digital comic",
+        "graphic novel",
+        "digest",
+        "hardcover",
+        "trade paperback",
+        "magazine",
+        "comic",
+      ];
+      let value = validOptions.some((e) => e == format);
+      newOptions = value ? { ...newOptions, format } : { ...newOptions };
+    }
+    if (options.dateDescriptor) {
+      let dateDescriptor = options.dateDescriptor;
+      let validOptions = ["thisMonth", "nextWeek", "thisWeek", "lastWeek"];
+      let value = validOptions.some((e) => e == dateDescriptor);
+      newOptions = value
+        ? { ...newOptions, dateDescriptor }
+        : { ...newOptions };
+    }
+    if (options.titleStartsWith) {
+      let titleStartsWith = "%" + options.titleStartsWith;
+      newOptions = { ...newOptions, titleStartsWith };
+    }
+  } else if (datatype === "series") {
+    if (options.titleStartsWith) {
+      let titleStartsWith = "%" + options.titleStartsWith;
+      newOptions = { ...newOptions, titleStartsWith };
+    }
+    if (options.seriesType) {
+      let seriesType = options.seriesType;
+      let validOptions = ["collection", "one shot", "limited", "ongoing"];
+      let value = validOptions.some((e) => e == seriesType);
+      newOptions = value ? { ...newOptions, seriesType } : { ...newOptions };
+    }
+    if (options.contains) {
+      let contains = options.contains;
+      let validOptions = [
+        "comix",
+        "megazine",
+        "trade paperback",
+        "hardcover",
+        "digest",
+        "graphic novel",
+        "digital comic",
+        "infinite comic",
+      ];
+      let value = validOptions.some((e) => e == contains);
+      newOptions = value ? { ...newOptions, contains } : { ...newOptions };
+    }
+  }
+  return newOptions;
+};
+const getById = (id, type) => {
+  return axios
+    .get(`https://gateway.marvel.com/v1/public/${type}/${id}${MARVEL_API}`)
+    .then(({ data }) => ({ success: true, data: data.data.results[0] }))
+    .catch(() => ({
+      success: false,
+      error: `${type.slice(0, -1)} not found`,
+    }));
+};
+const getValidSort = (dataType, options = "") => {
+  let orderBy = {};
+  if (dataType === "characters") {
+    let validOptions = ["-name", "name", "modified", "-modified"];
+    let value = validOptions.some((e) => e == options);
+    orderBy = value ? { orderBy: options } : { ...orderBy };
+  } else if (dataType === "comics") {
+    let validOptions = ["onsaleDate", "-onsaleDate", "title", "-title"];
+    let value = validOptions.some((e) => e == options);
+    orderBy = value ? { orderBy: options } : { ...orderBy };
+  } else if (dataType === "creators") {
+    let validOptions = [
+      "-lastName",
+      "lastName",
+      "-firstName",
+      "firstName",
+      "modified",
+      "-modified",
+    ];
+    let value = validOptions.some((e) => e == options);
+    orderBy = value ? { orderBy: options } : { ...orderBy };
+  } else if (dataType === "events") {
+    let validOptions = ["name", "-name", "startDate", "-startDate"];
+    let value = validOptions.some((e) => e == options);
+    orderBy = value ? { orderBy: options } : { ...orderBy };
+  } else if (dataType === "series") {
+    let validOptions = ["startYear", "-startYear", "title", "-title"];
+    let value = validOptions.some((e) => e == options);
+    orderBy = value ? { orderBy: options } : { ...orderBy };
+  } else if (dataType === "stories") {
+    let validOptions = ["modified", "-modified"];
+    let value = validOptions.some((e) => e == options);
+    orderBy = value ? { orderBy: options } : { ...orderBy };
+  }
+
+  return orderBy;
+};
+const objToQueryString = (obj) => {
+  return Object.entries(obj)
+    .map((params) => params.join("="))
+    .join("&");
+};
+const getTotalPages = (type, limit) => {
+  limit = limit > 1 ? (limit < 100 ? limit : 200) : 20;
+  return axios
+    .get(`https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&limit=1`)
+    .then(({ data }) => {
+      const items = data.data.total; // total items
+      const pages = items / limit > 1 ? Math.ceil(items / limit) : 1;
+      return +pages;
+    })
+    .catch((err) => {
+      return 1;
+    });
+};
+const getTotalPagesOfDataList = (id, type, dataType = "", limit) => {
+  return axios
+    .get(
+      `https://gateway.marvel.com/v1/public/${type}/${id}${MARVEL_API}&limit=1`
+    )
+    .then(({ data }) => {
+      let items = 1;
+      const result = data.data.results[0]; // total items
+
+      if (result.hasOwnProperty(dataType)) {
+        items = +result[dataType].available;
+      }
+      const pages = items / limit > 1 ? Math.ceil(items / limit) : 1;
+      return pages;
+    })
+    .catch((err) => {
+      throw new Error("Descripción del error");
+    });
+};
+const totalPages = (items, limit) => {
+  const pages = items / limit > 1 ? Math.ceil(items / limit) : 1;
+  return pages;
+};
+const getValidQueries = (datatype, q = {}) => {
+  if (!datatype) {
+    return new Error("getValidQueries: datatype is required");
+  }
+
+  let filter = getValidFilter(datatype, q);
+  let sort = getValidSort(datatype, q.orderBy);
+
+  let limit = q.limit || 20;
+  let offset = q.offset || 0;
+
+  let queries = objToQueryString({ ...filter, ...sort, limit, offset });
+
+  return queries;
+};
+const getType = (str = "") => {
+  const split = str.split("/");
+  return split[split.length - 1];
+};
+const getListsOfDataFromAnId = async (id, type, q = {}, dataType) => {
+  try {
+    const limit = q.limit || 20;
+    const page = q.page > 1 ? Math.ceil(q.page) : 1;
+    const items = q.items || false;
+    let pages;
+    if (items) {
+      pages = items / limit > 1 ? Math.ceil(items / limit) : 1;
+    } else {
+      pages = await getTotalPagesOfDataList(id, type, dataType, limit);
+    }
+
+    const offset = page > pages ? pages * limit - 20 : page * limit - 20;
+
+    const queries = getValidQueries(q);
+
+    return axios
+      .get(
+        `https://gateway.marvel.com/v1/public/${type}/${id}/${dataType}${MARVEL_API}&${queries}`
+      )
+      .then(({ data }) => {
+        const result = convertData(data.data.results, dataType);
+        const available = data.data.total;
+        return {
+          success: true,
+          pages,
+          page: offset / limit + 1,
+          data: result,
+          available,
+        };
+      })
+      .catch((err) => {
+        return { success: false, error: `${type.slice(0, -1)} ID invalid` };
+      });
+  } catch (error) {
+    return { success: false, error: `${type.slice(0, -1)} ID invalid` };
+  }
+};
 module.exports = {
-  getCharacters(id, params = {}, type) {
-    const queries = getValuesQueries(params);
-    return axios
-      .get(
-        `https://gateway.marvel.com/v1/public/${type}/${id}/characters${MARVEL_API}&${queries}`
-      )
-      .then(({ data }) => {
-        const characters = data.data.results;
-        const available = data.data.total;
-        const result = characters.map((character) => ({
-          id: character.id,
-          name: character.name,
-          desc: character.description,
-          img: character.thumbnail.path + "." + character.thumbnail.extension,
-        }));
-        return { data: result, available };
-      })
-      .catch(() => ({ data: [], available: 0 }));
-  },
-  getComics(id, params = {}, type) {
-    const queries = getValuesQueries(params);
-    return axios
-      .get(
-        `https://gateway.marvel.com/v1/public/${type}/${id}/comics${MARVEL_API}&${queries}`
-      )
-      .then(({ data }) => {
-        const comics = data.data.results;
-        const available = data.data.total;
-        const result = comics.map((comic) => ({
-          id: comic.id,
-          dates: comic.dates.filter((date) => date.type === "onsaleDate")[0],
-          format: comic.format,
-          img: comic.thumbnail.path + "." + comic.thumbnail.extension,
-          title: comic.title,
-        }));
-        return { data: result, available };
-      })
-      .catch((err) => ({ data: [], available: 0 }));
-  },
-  getCreators(id, params = {}, type) {
-    const queries = getValuesQueries(params);
+  getListsOfDataFromAnId,
+  async getInfo(type, q = {}) {
+    const dataType = getType(type);
+    const limit = q.limit || 20;
+    const page = q.page > 1 ? Math.ceil(q.page) : 1;
 
-    return axios
-      .get(
-        `https://gateway.marvel.com/v1/public/${type}/${id}/creators${MARVEL_API}&${queries}`
-      )
-      .then(({ data }) => {
-        const creators = data.data.results;
-        const available = data.data.total;
-        const result = creators.map((creator) => ({
-          id: creator.id,
-          fullname: creator.fullName,
-          img: creator.thumbnail.path + "." + creator.thumbnail.extension,
-        }));
+    const pages = await getTotalPages(type, limit);
 
-        return { data: result, available };
-      })
-      .catch(() => ({ data: [], available: 0 }));
-  },
-  getEvents(id, params = {}, type) {
-    const queries = getValuesQueries(params);
+    const offset = page > pages ? pages * limit - 20 : page * limit - 20;
 
-    return axios
-      .get(
-        `https://gateway.marvel.com/v1/public/${type}/${id}/events${MARVEL_API}&${queries}`
-      )
-      .then(({ data }) => {
-        const events = data.data.results;
-        const available = data.data.total;
-        const result = events.map((event) => ({
-          id: event.id,
-          title: event.title,
-          img: event.thumbnail.path + "." + event.thumbnail.extension,
-          desc: event.description,
-        }));
-        return { data: result, available };
-      })
-      .catch(() => ({ data: [], available: 0 }));
-  },
-
-  getStories(id, params = {}, type) {
-    const queries = getValuesQueries(params);
-
-    return axios
-      .get(
-        `https://gateway.marvel.com/v1/public/${type}/${id}/stories${MARVEL_API}&${queries}`
-      )
-      .then(({ data }) => {
-        const stories = data.data.results;
-        const available = data.data.total;
-        const result = stories.map((storie) => ({
-          id: storie.id,
-          type: storie.type,
-          title: storie.title,
-          desc: storie.description,
-        }));
-        return { data: result, available };
-      })
-      .catch(() => ({ data: [], available: 0 }));
-  },
-  getSeries(id, params = {}, type) {
-    const queries = getValuesQueries(params);
-
-    return axios
-      .get(
-        `https://gateway.marvel.com/v1/public/${type}/${id}/series${MARVEL_API}&${queries}`
-      )
-      .then(({ data }) => {
-        const series = data.data.results;
-        const available = data.data.total;
-        const result = series.map((serie) => ({
-          id: serie.id,
-          title: serie.title,
-          type: serie.type,
-          img: serie.thumbnail.path + "." + serie.thumbnail.extension,
-        }));
-        return { data: result, available };
-      })
-      .catch(() => ({ data: [], available: 0 }));
-  },
-
-  getById(id, type) {
-    return axios
-      .get(`https://gateway.marvel.com/v1/public/${type}/${id}${MARVEL_API}`)
-      .then(({ data }) => ({ success: true, data: data.data.results[0] }))
-      .catch(() => ({
-        success: false,
-        error: `${type.slice(0, -1)} not found`,
-      }));
-  },
-
-  getWithQuery(options = {}, type) {
-    const typeData = getType(type);
-    const orderBy = getValidQueries(typeData, options.orderBy);
-    const queries = getValuesQueries({ ...options, orderBy });
+    const queries = getValidQueries(dataType, { offset, ...q });
 
     return axios
       .get(
         `https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&${queries}`
       )
       .then(({ data }) => {
-        data = data.data.results;
-        const result = convertData(data, typeData);
+        const result = convertData(data.data.results, dataType);
 
-        return { success: true, data: result };
+        return { success: true, pages, page: offset / limit + 1, data: result };
       })
       .catch((err) => {
         return {
@@ -271,116 +322,77 @@ module.exports = {
         };
       });
   },
-  async getTotalItems(type, query = {}) {
-    const queries = getValuesQueries(query);
-    return axios
-      .get(
-        `https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&limit=1&${queries}`
-      )
-      .then(({ data }) => {
-        const items = data.data.total; // total items
-        const pages = items / limit > 1 ? Math.ceil(items / limit) : 1;
-        return pages;
-      })
-      .catch((err) => {
-        return 1;
-      });
-  },
+  async getInfoById(id, type) {
+    let info = await getById(id, type);
+    if (info.success) {
+      let data = info.data;
+      let dataInfo = {};
+      if (data.hasOwnProperty("events") && data.events.available) {
+        let items = data.events.available;
+        let events = await getListsOfDataFromAnId(
+          id,
+          type,
+          { limit: 10, items },
+          "events"
+        );
+        dataInfo = { ...dataInfo, events };
+      }
+      if (data.hasOwnProperty("creators") && data.creators.available) {
+        let items = data.events.available;
+        let creators = await getListsOfDataFromAnId(
+          id,
+          type,
+          { limit: 10, items },
+          "creators"
+        );
+        dataInfo = { ...dataInfo, creators };
+      }
+      if (data.hasOwnProperty("characters") && data.characters.available) {
+        let items = data.comics.available;
+        let characters = await getListsOfDataFromAnId(
+          id,
+          type,
+          { limit: 10, items },
+          "characters"
+        );
+        dataInfo = { ...dataInfo, characters };
+      }
+      if (data.hasOwnProperty("comics") && data.comics.available) {
+        let items = data.comics.available;
+        let comics = await getListsOfDataFromAnId(
+          id,
+          type,
+          { limit: 10, items },
+          "comics"
+        );
+        dataInfo = { ...dataInfo, comics };
+      }
+      if (data.hasOwnProperty("stories") && data.stories.available) {
+        let items = data.stories.available;
+        let stories = await getListsOfDataFromAnId(
+          data.id,
+          type,
+          { limit: 10, items },
+          "stories"
+        );
+        dataInfo = { ...dataInfo, stories };
+      }
+      if (data.hasOwnProperty("series") && data.series.available) {
+        let items = data.series.available;
+        let series = await getListsOfDataFromAnId(
+          data.id,
+          type,
+          { limit: 10, items },
+          "series"
+        );
+        dataInfo = { ...dataInfo, series };
+      }
+      const converInfo = convertData([info.data], type)[0];
 
-  async getTotalPages(type) {
-    return axios
-      .get(`https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&limit=1`)
-      .then(({ data }) => {
-        const items = data.data.total; // total items
-        const pages = items / limit > 1 ? Math.ceil(items / limit) : 1;
-        return pages;
-      })
-      .catch((err) => {
-        return 1;
-      });
-  },
-  getValidQueries(dataType, sort = "") {
-    let orderBy = "modified";
-    if (dataType === "characters") {
-      let valid = ["-name", "name", "modified", "-modified"];
-      orderBy = validateQuery(valid, sort) ? sort : "name";
-    } else if (dataType === "comics") {
-      let valid = ["onsaleDate", "-onsaleDate", "title", "-title"];
-      orderBy = validateQuery(valid, sort) ? sort : "title";
-    } else if (dataType === "creators") {
-      let valid = [
-        "-lastName",
-        "lastName",
-        "-firstName",
-        "firstName",
-        "modified",
-        "-modified",
-      ];
-      orderBy = validateQuery(valid, sort) ? sort : "firstName";
-    } else if (type === "events") {
-      let valid = ["name", "-name", "startDate", "-startDate"];
-      orderBy = validateQuery(valid, sort) ? sort : "name";
-    } else if (type === "series") {
-      let valid = ["startYear", "-startYear", "title", "-title"];
-      orderBy = validateQuery(valid, sort) ? sort : "title";
-    } else if (type === "stories") {
-      let valid = ["modified", "-modified"];
-      orderBy = validateQuery(valid, sort) ? sort : "modified";
+      return { ...converInfo, ...dataInfo };
+      // return { , };
+    } else {
+      return info;
     }
-
-    return orderBy;
   },
-  async newsComics(type) {
-    const today = getCurrentDate();
-    const lastWeek = getLastWeek();
-    return axios
-      .get(
-        `https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&dateRange=${lastWeek},${today}&noVariants=true&limit=15&orderBy=-onsaleDate`
-      )
-      .then(({ data }) => {
-        data = data.data.results;
-        const result = convertData(data, type);
-
-        return { success: true, data: result };
-      })
-      .catch(() => ({
-        success: false,
-        error: "Error",
-      }));
-  },
-  async getNextReleases(type) {
-    const nextDay = getNextDay();
-    const nextWeek = getNextWeek();
-    return axios
-      .get(
-        `https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&dateRange=${nextDay},${nextWeek}&noVariants=true&limit=15&orderBy=onsaleDate`
-      )
-      .then(({ data }) => {
-        data = data.data.results;
-        const result = convertData(data, type);
-
-        return { success: true, data: result };
-      })
-      .catch(() => ({
-        success: false,
-        error: "Error",
-      }));
-  },
-  async newsCharacters() {
-    return axios
-      .get(
-        `https://gateway.marvel.com/v1/public/characters${MARVEL_API}&orderBy=-modified&comics=84159,13809,12168,94943,17296,90374,84236,93354,37633,37064`
-      )
-      .then(({ data }) => {
-        data = data.data.results;
-        const result = convertData(data, "characters");
-
-        return { success: true, data: result };
-      })
-      .catch(() => ({
-        success: false,
-        error: "Error",
-      }));
-  },
-  getOffset(query = {}) {},
 };

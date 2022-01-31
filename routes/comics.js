@@ -11,9 +11,6 @@ var comicsController = require("../controllers/comics/");
 // get all Comics
 router.get("/", comicsController.getAllComics);
 
-// get new Comics
-router.get("/news", comicsController.getNewComics);
-
 // get comic by id (all info)
 router.get("/:id", comicsController.getComicById);
 
