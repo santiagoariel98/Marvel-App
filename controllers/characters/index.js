@@ -11,6 +11,7 @@ const {
   getTotalPages,
   getSortQueries,
 } = require("../utils.js");
+const { getInfo } = require("../newUtils");
 
 module.exports = {
   async getCharacters(req, res) {
@@ -19,7 +20,7 @@ module.exports = {
       const page = q.page > 1 ? q.page : 1;
       const limit = q.limit > 20 ? q.limit : 20;
       const orderBy = getSortQueries(type, q.orderBy);
-      const total = +q.total || (await getTotalPages(limit, type));
+      const total = +q.total || (await getTotalPages(type));
       const offset =
         page > total ? total * limit - limit : page * limit - limit;
       const characters = await getWithQuery({ limit, offset, orderBy }, type);
@@ -87,7 +88,7 @@ module.exports = {
 
     const orderBy = getSortQueries("comics", q.orderBy);
 
-    const total = +q.total || (await getTotalPages(limit, getType));
+    const total = +q.total || (await getTotalPages(getType));
     const offset = page > total ? total * limit - limit : page * limit - limit;
     const data = await getComics(id, { limit, offset, orderBy }, type);
     res.send({ pages: total, page: offset / limit + 1, ...data });
@@ -102,7 +103,7 @@ module.exports = {
 
     const orderBy = getSortQueries("events", q.orderBy);
 
-    const total = +q.total || (await getTotalPages(limit, getType));
+    const total = +q.total || (await getTotalPages(getType));
     const offset = page > total ? total * limit - limit : page * limit - limit;
     const data = await getEvents(id, { limit, offset, orderBy }, type);
     res.send({ pages: total, page: offset / limit + 1, ...data });
@@ -117,7 +118,7 @@ module.exports = {
 
     const orderBy = getSortQueries("series", q.orderBy);
 
-    const total = +q.total || (await getTotalPages(limit, getType));
+    const total = +q.total || (await getTotalPages(getType));
     const offset = page > total ? total * limit - limit : page * limit - limit;
     const data = await getSeries(id, { limit, offset, orderBy }, type);
     res.send({ pages: total, page: offset / limit + 1, ...data });
@@ -133,7 +134,7 @@ module.exports = {
 
     const orderBy = getSortQueries("stories", q.orderBy);
 
-    const total = +q.total || (await getTotalPages(limit, getType));
+    const total = +q.total || (await getTotalPages(getType));
     const offset = page > total ? total * limit - limit : page * limit - limit;
     const data = await getStories(id, { limit, offset, orderBy }, type);
     res.send({ pages: total, page: offset / limit + 1, ...data });

@@ -13,6 +13,11 @@ router.get("/comics", newsControllers.getNewsComics);
 
 router.get("/comics/release", newsControllers.getNextReleases);
 
-router.get("/characters/", newsControllers.getCharacters);
+router.get("/characters", newsControllers.getCharacters);
 
+router.get("/events", newsControllers.getEvents);
+
+router.get("/series", newsControllers.getNewsSeries);
+
+router.get("/prueba", newsControllers.pruebra);
 module.exports = router;

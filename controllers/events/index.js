@@ -96,7 +96,7 @@ module.exports = {
     const limit = q.limit > 50 ? q.limit : 50;
 
     const orderBy = getSortQueries("characters", q.orderBy);
-
+    console.log(orderBy);
     const total = +q.total || (await getTotalPages(limit, getType));
     const offset = page > total ? total * limit - limit : page * limit - limit;
     const data = await getCharacters(id, { limit, offset, orderBy }, type);

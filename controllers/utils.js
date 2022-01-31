@@ -1,7 +1,10 @@
 const axios = require("axios");
 
 const MARVEL_API = process.env.MARVEL_API;
-
+const getType = (str = "") => {
+  const split = str.split("/");
+  return split[split.length - 1];
+};
 const getCurrentDate = () => {
   return new Date().toISOString().split("T")[0];
 };
@@ -116,11 +119,10 @@ const convertData = (data, type) => {
 
 module.exports = {
   getCharacters(id, params = {}, type) {
-    const limit = params.limit || 20;
-    const offset = params.offset || 0;
+    const queries = getValuesQueries(params);
     return axios
       .get(
-        `https://gateway.marvel.com/v1/public/${type}/${id}/characters${MARVEL_API}&limit=${limit}&offset=${offset}`
+        `https://gateway.marvel.com/v1/public/${type}/${id}/characters${MARVEL_API}&${queries}`
       )
       .then(({ data }) => {
         const characters = data.data.results;
@@ -246,15 +248,19 @@ module.exports = {
         error: `${type.slice(0, -1)} not found`,
       }));
   },
+
   getWithQuery(options = {}, type) {
-    const queries = getValuesQueries(options);
+    const typeData = getType(type);
+    const orderBy = getValidQueries(typeData, options.orderBy);
+    const queries = getValuesQueries({ ...options, orderBy });
+
     return axios
       .get(
         `https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&${queries}`
       )
       .then(({ data }) => {
         data = data.data.results;
-        const result = convertData(data, type);
+        const result = convertData(data, typeData);
 
         return { success: true, data: result };
       })
@@ -265,7 +271,23 @@ module.exports = {
         };
       });
   },
-  async getTotalPages(limit = 20, type) {
+  async getTotalItems(type, query = {}) {
+    const queries = getValuesQueries(query);
+    return axios
+      .get(
+        `https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&limit=1&${queries}`
+      )
+      .then(({ data }) => {
+        const items = data.data.total; // total items
+        const pages = items / limit > 1 ? Math.ceil(items / limit) : 1;
+        return pages;
+      })
+      .catch((err) => {
+        return 1;
+      });
+  },
+
+  async getTotalPages(type) {
     return axios
       .get(`https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&limit=1`)
       .then(({ data }) => {
@@ -277,15 +299,15 @@ module.exports = {
         return 1;
       });
   },
-  getSortQueries(type, sort = "") {
+  getValidQueries(dataType, sort = "") {
     let orderBy = "modified";
-    if (type === "characters") {
+    if (dataType === "characters") {
       let valid = ["-name", "name", "modified", "-modified"];
       orderBy = validateQuery(valid, sort) ? sort : "name";
-    } else if (type === "comics") {
+    } else if (dataType === "comics") {
       let valid = ["onsaleDate", "-onsaleDate", "title", "-title"];
       orderBy = validateQuery(valid, sort) ? sort : "title";
-    } else if (type === "creators") {
+    } else if (dataType === "creators") {
       let valid = [
         "-lastName",
         "lastName",
@@ -331,7 +353,7 @@ module.exports = {
     const nextWeek = getNextWeek();
     return axios
       .get(
-        `https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&dateRange=${nextDay},${nextWeek}&noVariants=true&limit=15&orderBy=-onsaleDate`
+        `https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&dateRange=${nextDay},${nextWeek}&noVariants=true&limit=15&orderBy=onsaleDate`
       )
       .then(({ data }) => {
         data = data.data.results;
@@ -360,4 +382,5 @@ module.exports = {
         error: "Error",
       }));
   },
+  getOffset(query = {}) {},
 };
