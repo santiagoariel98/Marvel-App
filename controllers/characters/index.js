@@ -9,37 +9,14 @@ const {
   getById,
   getWithQuery,
   getTotalPages,
-  getSortQueries,
 } = require("../utils.js");
-const { getInfo } = require("../newUtils");
+const { getInfo, getListsOfDataFromAnId } = require("../newUtils");
 
 module.exports = {
   async getCharacters(req, res) {
-    try {
-      const q = req.query;
-      const page = q.page > 1 ? q.page : 1;
-      const limit = q.limit > 20 ? q.limit : 20;
-      const orderBy = getSortQueries(type, q.orderBy);
-      const total = +q.total || (await getTotalPages(type));
-      const offset =
-        page > total ? total * limit - limit : page * limit - limit;
-      const characters = await getWithQuery({ limit, offset, orderBy }, type);
-
-      res.send({ pages: total, page: offset / limit + 1, ...characters });
-    } catch (error) {
-      res.send({ error: "An error has occurred", success: false }).status(500);
-    }
-  },
-  async getNewCharacters(req, res) {
-    try {
-      const characters = await getWithQuery(
-        { orderBy: "-modified", limit: 10 },
-        type
-      );
-      res.send(characters);
-    } catch (error) {
-      res.send({ error: "An error has occurred", success: false }).status(500);
-    }
+    const q = req.query;
+    const characters = await getInfo(type, q);
+    res.send(characters).status(characters.success ? 200 : 400);
   },
   async getCharacterById(req, res) {
     const { id } = req.params;
@@ -79,64 +56,40 @@ module.exports = {
     }
   },
   async getComicsCharacter(req, res) {
-    const { id } = req.params; // ID Personaje/Characters
-    const getType = type + "/" + id + "/" + "comics";
+    const { id } = req.params;
+    let dataType = "comics";
     const q = req.query;
 
-    const page = q.page > 1 ? q.page : 1;
-    const limit = q.limit > 50 ? q.limit : 50;
+    const data = await getListsOfDataFromAnId(id, type, q, dataType);
 
-    const orderBy = getSortQueries("comics", q.orderBy);
-
-    const total = +q.total || (await getTotalPages(getType));
-    const offset = page > total ? total * limit - limit : page * limit - limit;
-    const data = await getComics(id, { limit, offset, orderBy }, type);
-    res.send({ pages: total, page: offset / limit + 1, ...data });
+    res.send(data).status(data.success ? 200 : 400);
   },
   async getEventsCharacter(req, res) {
-    const { id } = req.params; // ID Personaje/Characters
-    const getType = type + "/" + id + "/" + "events";
+    const { id } = req.params;
+    let dataType = "events";
     const q = req.query;
 
-    const page = q.page > 1 ? q.page : 1;
-    const limit = q.limit > 50 ? q.limit : 50;
+    const data = await getListsOfDataFromAnId(id, type, q, dataType);
 
-    const orderBy = getSortQueries("events", q.orderBy);
-
-    const total = +q.total || (await getTotalPages(getType));
-    const offset = page > total ? total * limit - limit : page * limit - limit;
-    const data = await getEvents(id, { limit, offset, orderBy }, type);
-    res.send({ pages: total, page: offset / limit + 1, ...data });
+    res.send(data).status(data.success ? 200 : 400);
   },
   async getSeriesCharacter(req, res) {
-    const { id } = req.params; // ID Personaje/Characters
-    const getType = type + "/" + id + "/" + "series";
+    const { id } = req.params;
+    let dataType = "series";
     const q = req.query;
 
-    const page = q.page > 1 ? q.page : 1;
-    const limit = q.limit > 50 ? q.limit : 50;
+    const data = await getListsOfDataFromAnId(id, type, q, dataType);
 
-    const orderBy = getSortQueries("series", q.orderBy);
-
-    const total = +q.total || (await getTotalPages(getType));
-    const offset = page > total ? total * limit - limit : page * limit - limit;
-    const data = await getSeries(id, { limit, offset, orderBy }, type);
-    res.send({ pages: total, page: offset / limit + 1, ...data });
+    res.send(data).status(data.success ? 200 : 400);
   },
 
   async getStoriesCharacter(req, res) {
-    const { id } = req.params; // ID Personaje/Characters
-    const getType = type + "/" + id + "/" + "stories";
+    const { id } = req.params;
+    let dataType = "stories";
     const q = req.query;
 
-    const page = q.page > 1 ? q.page : 1;
-    const limit = q.limit > 50 ? q.limit : 50;
+    const data = await getListsOfDataFromAnId(id, type, q, dataType);
 
-    const orderBy = getSortQueries("stories", q.orderBy);
-
-    const total = +q.total || (await getTotalPages(getType));
-    const offset = page > total ? total * limit - limit : page * limit - limit;
-    const data = await getStories(id, { limit, offset, orderBy }, type);
-    res.send({ pages: total, page: offset / limit + 1, ...data });
+    res.send(data).status(data.success ? 200 : 400);
   },
 };

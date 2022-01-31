@@ -1,4 +1,5 @@
 const axios = require("axios");
+const res = require("express/lib/response");
 const MARVEL_API = process.env.MARVEL_API;
 
 const convertData = (data, dataType) => {
@@ -7,6 +8,7 @@ const convertData = (data, dataType) => {
       id: character.id,
       name: character.name,
       img: character.thumbnail.path + "." + character.thumbnail.extension,
+      desc: character.description,
       totalComics: character.comics.available,
       totalEvents: character.events.available,
       totalSeries: character.series.available,
@@ -18,6 +20,8 @@ const convertData = (data, dataType) => {
       title: comic.title,
       img: comic.thumbnail.path + "." + comic.thumbnail.extension,
       desc: comic.description,
+      price: comic.prices.filter((price) => price.type === "printPrice")[0]
+        .price,
       onsale: comic.dates.filter((date) => date.type === "onsaleDate")[0].date,
       totalCharacters: comic.characters.available,
       totalCreators: comic.creators.available,
@@ -201,6 +205,23 @@ const getTotalPages = (type, limit) => {
       return 1;
     });
 };
+const getTotalPagesOfDataList = (id, type, dataType = "", limit) => {
+  return axios
+    .get(`https://gateway.marvel.com/v1/public/${type}/${id}${MARVEL_API}`)
+    .then(({ data }) => {
+      let items = 1;
+      const result = data.data.results[0]; // total items
+
+      if (result.hasOwnProperty(dataType)) {
+        items = +result[dataType].available;
+      }
+      const pages = items / limit > 1 ? Math.ceil(items / limit) : 1;
+      return pages;
+    })
+    .catch((err) => {
+      throw new Error("Descripción del error");
+    });
+};
 const getValidQueries = (datatype, q = {}) => {
   if (!datatype) {
     return new Error("getValidQueries: datatype is required");
@@ -258,21 +279,36 @@ module.exports = {
         error: `${type.slice(0, -1)} not found`,
       }));
   },
-  async getListsOfDataFromAnId(id, type, options = {}, dataType) {
-    const queries = getValidQueries(options);
+  async getListsOfDataFromAnId(id, type, q = {}, dataType) {
+    try {
+      const limit = q.limit || 20;
+      const page = q.page > 1 ? Math.ceil(q.page) : 1;
+      const pages = await getTotalPagesOfDataList(id, type, dataType, limit);
+      console.log(pages);
+      const offset = page > pages ? pages * limit - 20 : page * limit - 20;
 
-    return axios
-      .get(
-        `https://gateway.marvel.com/v1/public/${type}/${id}/${dataType}${MARVEL_API}&${queries}`
-      )
-      .then(({ data }) => {
-        const result = convertData(data.data.results, dataType);
-        const available = data.data.total;
-        return { data: result, available };
-      })
-      .catch((err) => {
-        console.log(err);
-        return { data: [], available: 0 };
-      });
+      const queries = getValidQueries(q);
+
+      return axios
+        .get(
+          `https://gateway.marvel.com/v1/public/${type}/${id}/${dataType}${MARVEL_API}&${queries}`
+        )
+        .then(({ data }) => {
+          const result = convertData(data.data.results, dataType);
+          const available = data.data.total;
+          return {
+            success: true,
+            pages,
+            page: offset / limit + 1,
+            data: result,
+            available,
+          };
+        })
+        .catch((err) => {
+          return { success: false, error: `${type.slice(0, -1)} ID invalid` };
+        });
+    } catch (error) {
+      return { success: false, error: `${type.slice(0, -1)} ID invalidss` };
+    }
   },
 };
