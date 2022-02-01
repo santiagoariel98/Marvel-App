@@ -11,6 +11,11 @@ var comicsController = require("../controllers/comics/");
 // get all Comics
 router.get("/", comicsController.getAllComics);
 
+// get all Comics
+router.get("/news", comicsController.getNewsComics);
+
+router.get("/last", comicsController.getLastComics);
+
 // get comic by id (all info)
 router.get("/:id", comicsController.getComicById);
 

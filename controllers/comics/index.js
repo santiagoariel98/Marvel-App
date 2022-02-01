@@ -1,12 +1,45 @@
 const type = "comics";
 
-const { getListsOfDataFromAnId, getInfo, getInfoById } = require("../utils");
+const {
+  getListsOfDataFromAnId,
+  getInfo,
+  getInfoById,
+  getCurrentDate,
+  getNextDay,
+  getLastWeek,
+  getNextWeek,
+} = require("../utils");
 
 module.exports = {
   async getAllComics(req, res) {
     const q = req.query;
     const characters = await getInfo(type, q);
     res.send(characters).status(characters.success ? 200 : 400);
+  },
+  async getLastComics(req, res) {
+    let day = getCurrentDate();
+    let lastWeek = getLastWeek();
+    let lastInfo = lastWeek + "," + day;
+
+    const lastComics = await getInfo("comics", {
+      dateRange: lastInfo,
+      limit: 15,
+      orderBy: "-modified",
+    });
+
+    res.send(lastComics).status(lastComics.success ? 200 : 400);
+  },
+  async getNewsComics(req, res) {
+    let nextDay = getNextDay();
+    let nextWeek = getNextWeek();
+    let newInfo = nextDay + "," + nextWeek;
+
+    const nextComics = await getInfo("comics", {
+      dateRange: newInfo,
+      limit: 15,
+      orderBy: "modified",
+    });
+    res.send(nextComics).status(nextComics.success ? 200 : 400);
   },
   async getComicById(req, res) {
     const { id } = req.params;

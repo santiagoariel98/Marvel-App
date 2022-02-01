@@ -7,6 +7,8 @@ var charactersController = require("../controllers/series/");
 
 router.get("/", charactersController.getAllSeries);
 
+router.get("/news", charactersController.getNewsSeries);
+
 router.get("/:id", charactersController.getSerieById);
 
 router.get("/:id/comics", charactersController.getComicsSerie);

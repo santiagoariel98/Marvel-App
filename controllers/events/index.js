@@ -8,7 +8,14 @@ module.exports = {
     const data = await getInfo(type, q);
     res.send(data).status(data.success ? 200 : 400);
   },
+  async getNewsEvents(req, res) {
+    const events = await getInfo("events", {
+      orderBy: "-startDate",
+      limit: 6,
+    });
 
+    res.send(events).status(events.success ? 200 : 400);
+  },
   async getEventById(req, res) {
     const { id } = req.params;
     const dataID = await getInfoById(id, type);

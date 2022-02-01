@@ -1,6 +1,6 @@
 const type = "series";
 
-const { getListsOfDataFromAnId, getInfo } = require("../utils");
+const { getListsOfDataFromAnId, getInfo, getInfoById } = require("../utils");
 
 module.exports = {
   async getAllSeries(req, res) {
@@ -8,7 +8,14 @@ module.exports = {
     const characters = await getInfo(type, q);
     res.send(characters).status(characters.success ? 200 : 400);
   },
+  async getNewsSeries(req, res) {
+    const series = await getInfo("series", {
+      limit: 10,
+      startYear: 2022,
+    });
 
+    res.send(series).status(series.success ? 200 : 400);
+  },
   async getSerieById(req, res) {
     const { id } = req.params;
     const dataID = await getInfoById(id, type);

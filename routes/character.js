@@ -8,6 +8,9 @@ var charactersController = require("../controllers/characters/");
 // get characters
 router.get("/", charactersController.getCharacters);
 
+// get characters
+router.get("/news", charactersController.getNewsCharacters);
+
 // get character id
 router.get("/:id", charactersController.getCharacterById);
 

@@ -1,11 +1,19 @@
 const type = "characters";
 
 const { getInfo, getListsOfDataFromAnId, getInfoById } = require("../utils");
-
 module.exports = {
   async getCharacters(req, res) {
     const q = req.query;
     const characters = await getInfo(type, q);
+    res.send(characters).status(characters.success ? 200 : 400);
+  },
+  async getNewsCharacters(req, res) {
+    const characters = await getInfo(type, {
+      events: "336,321,316",
+      orderBy: "-modified",
+      limit: 15,
+    });
+
     res.send(characters).status(characters.success ? 200 : 400);
   },
   async getCharacterById(req, res) {

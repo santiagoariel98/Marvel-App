@@ -11,6 +11,9 @@ var eventsController = require("../controllers/events/");
 // get all events
 router.get("/", eventsController.getAllEvents);
 
+// get all events
+router.get("/news", eventsController.getNewsEvents);
+
 //  get characters event
 router.get("/:id/characters", eventsController.getCharactersEvent);
 

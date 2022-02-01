@@ -1,6 +1,34 @@
 const axios = require("axios");
 const MARVEL_API = process.env.MARVEL_API;
 
+const getCurrentDate = () => {
+  return new Date().toISOString().split("T")[0];
+};
+const getLastWeek = () => {
+  let today = new Date();
+  let lastWeek = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() - 7
+  );
+  return lastWeek.toISOString().split("T")[0];
+};
+const getNextWeek = () => {
+  let today = new Date();
+  let lastWeek = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() + 8
+  );
+  return lastWeek.toISOString().split("T")[0];
+};
+const getNextDay = () => {
+  let today = new Date();
+  return new Date(today.getTime() + 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split("T")[0];
+};
+
 const convertData = (data, dataType) => {
   if (dataType === "characters") {
     return data.map((character) => ({
@@ -88,8 +116,14 @@ const getValidFilter = (datatype, options = {}) => {
     datatype === "events"
   ) {
     if (options.nameStartsWith) {
-      let nameStart = "%" + options.nameStartsWith;
-      newOptions = { ...newOptions, nameStart };
+      let nameStartsWith =
+        "%" + options.nameStartsWith.trim().replace(/\s+/g, "%");
+      newOptions = { ...newOptions, nameStartsWith };
+    }
+    if (datatype === "characters") {
+      let events = options.events;
+      let value = events.split(",").every((num) => num == +num);
+      newOptions = value ? { ...newOptions, events } : { ...newOptions };
     }
   } else if (datatype === "comics") {
     if (options.format) {
@@ -117,8 +151,16 @@ const getValidFilter = (datatype, options = {}) => {
         : { ...newOptions };
     }
     if (options.titleStartsWith) {
-      let titleStartsWith = "%" + options.titleStartsWith;
+      let titleStartsWith =
+        "%" + options.titleStartsWith.trim().replace(/\s+/g, "%");
       newOptions = { ...newOptions, titleStartsWith };
+    }
+    if (options.dateRange) {
+      let dateRange = options.dateRange;
+      let value = dateRange
+        .split(",")
+        .every((e) => new Date(e) != "Invalid Date");
+      newOptions = value ? { ...newOptions, dateRange } : { ...newOptions };
     }
   } else if (datatype === "series") {
     if (options.titleStartsWith) {
@@ -145,6 +187,11 @@ const getValidFilter = (datatype, options = {}) => {
       ];
       let value = validOptions.some((e) => e == contains);
       newOptions = value ? { ...newOptions, contains } : { ...newOptions };
+    }
+    if (options.startYear) {
+      let startYear = options.startYear;
+      let value = +startYear == startYear;
+      newOptions = value ? { ...newOptions, startYear } : { ...newOptions };
     }
   }
   return newOptions;
@@ -232,10 +279,7 @@ const getTotalPagesOfDataList = (id, type, dataType = "", limit) => {
       throw new Error("Descripción del error");
     });
 };
-const totalPages = (items, limit) => {
-  const pages = items / limit > 1 ? Math.ceil(items / limit) : 1;
-  return pages;
-};
+
 const getValidQueries = (datatype, q = {}) => {
   if (!datatype) {
     return new Error("getValidQueries: datatype is required");
@@ -305,7 +349,7 @@ module.exports = {
     const offset = page > pages ? pages * limit - limit : page * limit - limit;
 
     const queries = getValidQueries(dataType, { offset, ...q });
-
+    console.log("queries", +"    ", queries, dataType);
     return axios
       .get(
         `https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&${queries}`
@@ -394,4 +438,8 @@ module.exports = {
       return info;
     }
   },
+  getCurrentDate,
+  getLastWeek,
+  getNextWeek,
+  getNextDay,
 };
