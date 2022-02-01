@@ -121,9 +121,11 @@ const getValidFilter = (datatype, options = {}) => {
       newOptions = { ...newOptions, nameStartsWith };
     }
     if (datatype === "characters") {
-      let events = options.events;
-      let value = events.split(",").every((num) => num == +num);
-      newOptions = value ? { ...newOptions, events } : { ...newOptions };
+      if (options.events) {
+        let events = options.events;
+        let value = events.split(",").every((num) => num == +num);
+        newOptions = value ? { ...newOptions, events } : { ...newOptions };
+      }
     }
   } else if (datatype === "comics") {
     if (options.format) {
