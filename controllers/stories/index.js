@@ -12,7 +12,7 @@ module.exports = {
   async getStorieById(req, res) {
     const { id } = req.params;
     const dataID = await getInfoById(id, type);
-    res.send(dataID);
+    res.send(dataID).status(dataID.success ? 200 : 400);
   },
   async getComicsStorie(req, res) {
     const { id } = req.params;

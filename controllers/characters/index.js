@@ -11,7 +11,7 @@ module.exports = {
   async getCharacterById(req, res) {
     const { id } = req.params;
     const dataID = await getInfoById(id, type);
-    res.send(dataID);
+    res.send(dataID).status(dataID.success ? 200 : 400);
   },
   async getComicsCharacter(req, res) {
     const { id } = req.params;

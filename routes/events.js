@@ -1,33 +1,29 @@
-// var express = require("express");
-// var router = express.Router();
+var express = require("express");
+var router = express.Router();
 
-// var eventsController = require("../controllers/events/");
+var eventsController = require("../controllers/events/");
 
-// /* GET users listing. */
+/* GET users listing. */
 
-// // get comics
-// // router.get("/", comicsController.getCharacters);
+// get comics
+// router.get("/", comicsController.getCharacters);
 
-// // get all events
-// router.get("/", eventsController.getAllEvents);
+// get all events
+router.get("/", eventsController.getAllEvents);
 
-// // get new events
-// router.get("/news", eventsController.getNewEvents);
+//  get characters event
+router.get("/:id/characters", eventsController.getCharactersEvent);
 
-// //  get characters event
-// // router.get("/:id/characters", eventsController.getCharactersEvent);
+// get comics event
+router.get("/:id/comics", eventsController.getComicsEvent);
 
-// // // get comics event
-// // router.get("/:id/comics", eventsController.getComicsEvent);
+// get creators event
+router.get("/:id/creators", eventsController.getCreatorsEvent);
 
-// // // get creators event
-// // router.get("/:id/creators", eventsController.getCreatorsEvent);
+// get events event
+router.get("/:id/series", eventsController.getSeriesEvent);
 
-// // // get events event
-// // router.get("/:id/series", eventsController.getSeriesEvent);
+// get stories event
+router.get("/:id/stories", eventsController.getStoriesEvent);
 
-// // // get stories event
-// // router.get("/:id/stories", eventsController.getStoriesEvent);
-
-// module.exports = router;
-// //
+module.exports = router;

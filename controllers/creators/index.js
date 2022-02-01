@@ -12,7 +12,8 @@ module.exports = {
   async getCreatorById(req, res) {
     const { id } = req.params;
     const dataID = await getInfoById(id, type);
-    res.send(dataID);
+    console.log(dataID);
+    res.send(dataID).status(dataID.success ? 200 : 400);
   },
   async getComicsCreator(req, res) {
     const { id } = req.params;

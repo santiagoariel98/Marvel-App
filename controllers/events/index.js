@@ -1,29 +1,20 @@
-const type = "series";
+const type = "events";
 
-const { getListsOfDataFromAnId, getInfo } = require("../utils");
+const { getInfo, getListsOfDataFromAnId } = require("../utils");
 
 module.exports = {
-  async getAllSeries(req, res) {
+  async getAllEvents(req, res) {
     const q = req.query;
-    const characters = await getInfo(type, q);
-    res.send(characters).status(characters.success ? 200 : 400);
+    const data = await getInfo(type, q);
+    res.send(data).status(data.success ? 200 : 400);
   },
 
-  async getSerieById(req, res) {
+  async getEventById(req, res) {
     const { id } = req.params;
     const dataID = await getInfoById(id, type);
     res.send(dataID).status(dataID.success ? 200 : 400);
   },
-  async getComicsSerie(req, res) {
-    const { id } = req.params;
-    let dataType = "comics";
-    const q = req.query;
-
-    const data = await getListsOfDataFromAnId(id, type, q, dataType);
-
-    res.send(data).status(data.success ? 200 : 400);
-  },
-  async getCharactersSerie(req, res) {
+  async getCharactersEvent(req, res) {
     const { id } = req.params;
     let dataType = "characters";
     const q = req.query;
@@ -32,7 +23,16 @@ module.exports = {
 
     res.send(data).status(data.success ? 200 : 400);
   },
-  async getCreatorsSerie(req, res) {
+  async getComicsEvent(req, res) {
+    const { id } = req.params;
+    let dataType = "comics";
+    const q = req.query;
+
+    const data = await getListsOfDataFromAnId(id, type, q, dataType);
+
+    res.send(data).status(data.success ? 200 : 400);
+  },
+  async getCreatorsEvent(req, res) {
     const { id } = req.params;
     let dataType = "creators";
     const q = req.query;
@@ -41,17 +41,16 @@ module.exports = {
 
     res.send(data).status(data.success ? 200 : 400);
   },
-  async getEventsSerie(req, res) {
+  async getSeriesEvent(req, res) {
     const { id } = req.params;
-    let dataType = "events";
+    let dataType = "series";
     const q = req.query;
 
     const data = await getListsOfDataFromAnId(id, type, q, dataType);
 
     res.send(data).status(data.success ? 200 : 400);
   },
-
-  async getStoriesSerie(req, res) {
+  async getStoriesEvent(req, res) {
     const { id } = req.params;
     let dataType = "stories";
     const q = req.query;

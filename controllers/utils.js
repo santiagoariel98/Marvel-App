@@ -302,7 +302,7 @@ module.exports = {
 
     const pages = await getTotalPages(type, limit);
 
-    const offset = page > pages ? pages * limit - 20 : page * limit - 20;
+    const offset = page > pages ? pages * limit - limit : page * limit - limit;
 
     const queries = getValidQueries(dataType, { offset, ...q });
 
@@ -338,7 +338,7 @@ module.exports = {
         dataInfo = { ...dataInfo, events };
       }
       if (data.hasOwnProperty("creators") && data.creators.available) {
-        let items = data.events.available;
+        let items = data.creators.available;
         let creators = await getListsOfDataFromAnId(
           id,
           type,
@@ -348,7 +348,7 @@ module.exports = {
         dataInfo = { ...dataInfo, creators };
       }
       if (data.hasOwnProperty("characters") && data.characters.available) {
-        let items = data.comics.available;
+        let items = data.characters.available;
         let characters = await getListsOfDataFromAnId(
           id,
           type,
@@ -389,8 +389,7 @@ module.exports = {
       }
       const converInfo = convertData([info.data], type)[0];
 
-      return { ...converInfo, ...dataInfo };
-      // return { , };
+      return { success: true, data: { ...converInfo, ...dataInfo } };
     } else {
       return info;
     }
