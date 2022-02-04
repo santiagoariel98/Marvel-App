@@ -25,7 +25,6 @@ module.exports = {
     const { id } = req.params;
     let dataType = "comics";
     const q = req.query;
-
     const data = await getListsOfDataFromAnId(id, type, q, dataType);
 
     res.send(data).status(data.success ? 200 : 400);

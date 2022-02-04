@@ -314,9 +314,7 @@ const getListsOfDataFromAnId = async (id, type, q = {}, dataType) => {
     }
 
     const offset = page > pages ? pages * limit - 20 : page * limit - 20;
-
-    const queries = getValidQueries(q);
-
+    const queries = getValidQueries(dataType, { ...q, offset });
     return axios
       .get(
         `https://gateway.marvel.com/v1/public/${type}/${id}/${dataType}${MARVEL_API}&${queries}`
