@@ -313,8 +313,10 @@ const getListsOfDataFromAnId = async (id, type, q = {}, dataType) => {
       pages = await getTotalPagesOfDataList(id, type, dataType, limit);
     }
 
-    const offset = page > pages ? pages * limit - 20 : page * limit - 20;
+    const offset = page > pages ? pages * limit - limit : page * limit - limit;
+
     const queries = getValidQueries(dataType, { ...q, offset });
+
     return axios
       .get(
         `https://gateway.marvel.com/v1/public/${type}/${id}/${dataType}${MARVEL_API}&${queries}`
@@ -349,7 +351,6 @@ module.exports = {
     const offset = page > pages ? pages * limit - limit : page * limit - limit;
 
     const queries = getValidQueries(dataType, { offset, ...q });
-    console.log("queries", +"    ", queries, dataType);
     return axios
       .get(
         `https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&${queries}`
