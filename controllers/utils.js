@@ -377,7 +377,7 @@ module.exports = {
         let events = await getListsOfDataFromAnId(
           id,
           type,
-          { limit: 10, items },
+          { limit: 20, items },
           "events"
         );
         dataInfo = { ...dataInfo, events };
@@ -387,7 +387,7 @@ module.exports = {
         let creators = await getListsOfDataFromAnId(
           id,
           type,
-          { limit: 10, items },
+          { limit: 20, items },
           "creators"
         );
         dataInfo = { ...dataInfo, creators };
@@ -397,7 +397,7 @@ module.exports = {
         let characters = await getListsOfDataFromAnId(
           id,
           type,
-          { limit: 10, items },
+          { limit: 20, items },
           "characters"
         );
         dataInfo = { ...dataInfo, characters };
@@ -407,7 +407,7 @@ module.exports = {
         let comics = await getListsOfDataFromAnId(
           id,
           type,
-          { limit: 10, items },
+          { limit: 20, items },
           "comics"
         );
         dataInfo = { ...dataInfo, comics };
@@ -417,7 +417,7 @@ module.exports = {
         let stories = await getListsOfDataFromAnId(
           data.id,
           type,
-          { limit: 10, items },
+          { limit: 20, items },
           "stories"
         );
         dataInfo = { ...dataInfo, stories };
@@ -427,7 +427,7 @@ module.exports = {
         let series = await getListsOfDataFromAnId(
           data.id,
           type,
-          { limit: 10, items },
+          { limit: 20, items },
           "series"
         );
         dataInfo = { ...dataInfo, series };
