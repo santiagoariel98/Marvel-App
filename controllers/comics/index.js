@@ -36,7 +36,7 @@ module.exports = {
     const nextComics = await getInfo("comics", {
       dateRange: newInfo,
       limit: 15,
-      orderBy: "modified",
+      orderBy: "-modified",
     });
     res.send(nextComics).status(nextComics.success ? 200 : 400);
   },
