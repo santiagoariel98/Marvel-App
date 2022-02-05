@@ -1,5 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { fetchGetCharacterById, fetchGetCharacters } from "./characterAPI";
+import {
+  fetchGetCharacterById,
+  fetchGetCharacters,
+  fetchGetData,
+} from "./characterAPI";
 
 const initialState = {
   status: "idle",
@@ -14,6 +18,13 @@ export const getCharactersAsync = createAsyncThunk(
   "character/getCharacters",
   async () => {
     const response = await fetchGetCharacters();
+    return response;
+  }
+);
+export const getDatatypeInfo = createAsyncThunk(
+  "character/getDatatypeInfo",
+  async (data) => {
+    const response = await fetchGetData(data);
     return response;
   }
 );
@@ -54,6 +65,16 @@ export const characterSlice = createSlice({
           state.errorMsg = "Se ha producido un Problema";
         }
       });
+
+    builder.addCase(getDatatypeInfo.fulfilled, (state, action) => {
+      state.status = "idle";
+      if (action.payload.success) {
+        console.log(action.payload);
+        state.currentCharacter.data.comics = action.payload;
+      } else {
+        state.errorMsg = "Se ha producido un Problema";
+      }
+    });
   },
 });
 

@@ -5,9 +5,9 @@ function CardList({ data, type }) {
   return (
     <div
       key={data.id}
-      className="lg:w-64 lg:h-80 relative my-8 sm:mx-2 mx-6 w-32 h-40 shadow-md transition-all duration-500 cursor-pointer hover:scale-110 group"
+      className="md:w-64 md:h-80 relative my-8 sm:mx-2 mx-6 w-32 h-40 shadow-md transition-all duration-500 cursor-pointer hover:scale-110 group"
     >
-      <div className="rounded-md lg:w-64 lg:h-80 w-32 h-40">
+      <div className="rounded-md md:w-64 md:h-80 w-32 h-40">
         <img
           loading="lazy"
           src={data.img}
@@ -16,7 +16,7 @@ function CardList({ data, type }) {
         />
       </div>
 
-      <div className="h-max text-[0.6em] text-center font-bold items-center absolute top-0 flex justify-center left-0 right-0 my-0 mx-auto bg-lightgray opacity-0 transition-all group-hover:opacity-100 group-hover:bg-white group-hover:top-2 border-y-2 border-gray-300 group-active:opacity-0 lg:text-[1em]">
+      <div className="h-max text-[0.6em] text-center font-bold items-center absolute top-0 flex justify-center left-0 right-0 my-0 mx-auto bg-lightgray opacity-0 transition-all group-hover:opacity-100 group-hover:bg-white group-hover:top-2 border-y-2 border-gray-300 group-active:opacity-0 md:text-[1em]">
         <p>{data.title ? data.title : data.name}</p>
       </div>
       <Link
