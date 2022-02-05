@@ -44,7 +44,7 @@ module.exports = {
     const nextComics = await getInfo("comics", {
       dateRange: newInfo,
       limit: 15,
-      orderBy: "onsaleDate,modified",
+      orderBy: "onsaleDate",
     });
     res
       .send({
