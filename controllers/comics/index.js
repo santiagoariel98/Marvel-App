@@ -20,7 +20,6 @@ module.exports = {
     let day = getCurrentDate();
     let lastWeek = getLastWeek();
     let lastInfo = lastWeek + "," + day;
-
     const lastComics = await getInfo("comics", {
       dateRange: lastInfo,
       limit: 15,
