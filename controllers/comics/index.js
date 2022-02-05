@@ -26,7 +26,15 @@ module.exports = {
       orderBy: "-modified",
     });
 
-    res.send(lastComics).status(lastComics.success ? 200 : 400);
+    res
+      .send({
+        ...lastComics,
+        dates: {
+          lastWeek,
+          today: day,
+        },
+      })
+      .status(lastComics.success ? 200 : 400);
   },
   async getNewsComics(req, res) {
     let nextDay = getNextDay();
@@ -36,10 +44,17 @@ module.exports = {
     const nextComics = await getInfo("comics", {
       dateRange: newInfo,
       limit: 5,
-      orderBy: "modified",
+      orderBy: "onsaleDate,modified",
     });
     res
-      .send({ ...nextComics, nextDay, nextWeek })
+      .send({
+        ...nextComics,
+        dates: {
+          nextDay,
+          nextWeek,
+        },
+      })
+
       .status(nextComics.success ? 200 : 400);
   },
   async getComicById(req, res) {
