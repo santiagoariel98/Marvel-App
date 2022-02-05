@@ -6,9 +6,12 @@ import {
 } from "./characterAPI";
 
 const initialState = {
-  status: "idle",
-  page: 1,
-  totalPage: 78,
+  status: {
+    general: "idle",
+    comics: "idle",
+    events: "idle",
+    series: "idle",
+  },
   currentCharacters: [],
   currentCharacter: {},
   errorMsg: "",
@@ -42,10 +45,10 @@ export const characterSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(getCharactersAsync.pending, (state) => {
-        state.status = "loading";
+        state.status.general = "loading";
       })
       .addCase(getCharactersAsync.fulfilled, (state, action) => {
-        state.status = "idle";
+        state.status.general = "idle";
         if (action.payload.success) {
           state.currentCharacters = action.payload.data;
         } else {
@@ -55,10 +58,10 @@ export const characterSlice = createSlice({
 
     builder
       .addCase(getCharacterByIdAsync.pending, (state) => {
-        state.status = "loading";
+        state.status.general = "loading";
       })
       .addCase(getCharacterByIdAsync.fulfilled, (state, action) => {
-        state.status = "idle";
+        state.status.general = "idle";
         if (action.payload.success) {
           state.currentCharacter = action.payload;
         } else {
@@ -66,15 +69,36 @@ export const characterSlice = createSlice({
         }
       });
 
-    builder.addCase(getDatatypeInfo.fulfilled, (state, action) => {
-      state.status = "idle";
-      if (action.payload.success) {
-        console.log(action.payload);
-        state.currentCharacter.data.comics = action.payload;
-      } else {
-        state.errorMsg = "Se ha producido un Problema";
-      }
-    });
+    builder
+      .addCase(getDatatypeInfo.pending, (state, action) => {
+        if (action.meta.arg.datatype === "comics") {
+          state.status.comics = "loading";
+        }
+        if (action.meta.arg.datatype === "events") {
+          state.status.events = "loading";
+        }
+        if (action.meta.arg.datatype === "series") {
+          state.status.series = "loading";
+        }
+      })
+      .addCase(getDatatypeInfo.fulfilled, (state, action) => {
+        let status = action.payload.data.success;
+        let datatype = action.payload.datatype;
+        if (status && datatype === "comics") {
+          state.status.comics = "idle";
+          state.currentCharacter.data.comics = action.payload.data;
+        } else if (status && datatype === "events") {
+          state.status.events = "idle";
+          state.currentCharacter.data.events = action.payload.data;
+        } else if (status && datatype === "series") {
+          state.status.series = "idle";
+          state.currentCharacter.data.series = action.payload.data;
+        } else {
+          state.status.comics = "idle";
+          state.status.events = "idle";
+          state.status.series = "idle";
+        }
+      });
   },
 });
 

@@ -39,7 +39,7 @@ function Home() {
   const events = useSelector((state) => state.home.events);
   const newsComics = useSelector((state) => state.home.newsComics);
   const lastComics = useSelector((state) => state.home.lastComics);
-
+  new Date().toDateString();
   useEffect(() => {
     dispatch(getCharacters());
     dispatch(getEvents());

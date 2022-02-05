@@ -1,18 +1,22 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-function CardList({ data, type }) {
+function CardList({ data, type, status }) {
   return (
     <div
       key={data.id}
-      className="md:w-64 md:h-80 relative my-8 sm:mx-2 mx-6 w-32 h-40 shadow-md transition-all duration-500 cursor-pointer hover:scale-110 group"
+      className={`rounded-md md:w-64 md:h-80 relative my-8 sm:mx-2 mx-6 w-32 h-40 shadow-md transition-all duration-500 cursor-pointer hover:scale-110 group ${
+        status === "loading" ? "animate-pulse" : ""
+      }`}
     >
       <div className="rounded-md md:w-64 md:h-80 w-32 h-40">
         <img
           loading="lazy"
           src={data.img}
           alt={data.title ? data.title : data.name}
-          className="object-cover rounded-md h-full w-full mx-auto"
+          className={`object-cover rounded-md h-full w-full mx-auto transition-all ${
+            status === "loading" ? "blur-sm" : ""
+          }`}
         />
       </div>
 

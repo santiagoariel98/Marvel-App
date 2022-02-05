@@ -32,8 +32,21 @@ function Card({ data, type }) {
         <></>
       )}
 
-      <div className="h-12 text-center font-bold text-base items-center absolute top-0 flex justify-center left-0 right-0 my-0 mx-auto bg-lightgray opacity-0 transition-all group-hover:opacity-100 group-hover:bg-white group-hover:top-5 border-y-2 border-gray-300 group-active:opacity-0">
+      <div className="text-center font-bold text-base items-center absolute top-0 left-0 right-0 my-0 mx-auto bg-lightgray opacity-0 transition-all group-hover:opacity-100 group-hover:bg-white group-hover:top-5 border-y-2 border-gray-300 group-active:opacity-0">
         <p>{data.title ? data.title : data.name}</p>
+        {data.onsale ? (
+          <p className="text-center text-[0.8em] w-max mx-auto">
+            -
+            {new Date(data.onsale)
+              .toDateString()
+              .split(" ")
+              .slice(1, 3)
+              .join(" ")}
+            -
+          </p>
+        ) : (
+          <></>
+        )}
       </div>
       <Link
         to={`/${type}/${data.id}`}

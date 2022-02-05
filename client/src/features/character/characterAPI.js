@@ -18,5 +18,5 @@ export function fetchGetData(data) {
     .get(
       `https://marvel-api-sv.herokuapp.com/api/${type}/${id}/${datatype}?page=${pages}`
     )
-    .then(({ data }) => data);
+    .then(({ data }) => ({ data, datatype }));
 }

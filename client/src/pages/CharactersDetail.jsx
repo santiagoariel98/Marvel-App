@@ -1,44 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 // components
-import CardList from "../components/CardList";
 import "react-multi-carousel/lib/styles.css";
 import Loading from "../components/Loading";
 
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 //redux
-import {
-  getCharacterByIdAsync,
-  getDatatypeInfo,
-} from "../features/character/characterSlice";
-import { Pagination } from "@mui/material";
+import { getCharacterByIdAsync } from "../features/character/characterSlice";
 import Detail from "../components/Detail";
 
 function CharactersDetail() {
   const { id } = useParams();
   const dispatch = useDispatch();
 
-  const [page, setPage] = useState(1);
-
-  const handleChange = (e, value) => {
-    setPage(value);
-    if (value !== page) {
-      console.log("ok");
-      dispatch(
-        getDatatypeInfo({
-          type: "characters",
-          id,
-          datatype: "comics",
-          pages: value,
-        })
-      );
-    }
-  };
-
   const info = useSelector((state) => state.characters.currentCharacter);
-
+  const status = useSelector((state) => state.characters.status.general);
   useEffect(() => {
     if (!info.data || +info.data.id !== +id)
       dispatch(getCharacterByIdAsync(id));
@@ -46,6 +24,7 @@ function CharactersDetail() {
 
   return (
     <div className="bg-black">
+      {status === "loading" ? <Loading /> : <></>}
       {info && info.data && info.success ? (
         <>
           <section className="relative h-screen overflow-y-hidden">
@@ -108,65 +87,23 @@ function CharactersDetail() {
           )}
           {/* events */}
           {info.data.totalEvents > 0 ? (
-            <section className="bg-white py-2">
-              <h1
-                id="events"
-                className="text-center text-black text-[2em] font-bold pt-16"
-              >
-                Events
-              </h1>
-              <div className="md:auto-rows-[21rem] grid gap-4 grid-flow-dense auto-rows-[12rem] grid-cols-menu md:grid-cols-menu2 w-full place-items-center">
-                {info.data.events.data.length ? (
-                  info.data.events.data.map((comic) => (
-                    <CardList key={comic.id} data={comic} type={"events"} />
-                  ))
-                ) : (
-                  <></>
-                )}
-              </div>
-              {info.data.events.pages > 1 ? (
-                <Link
-                  to="events"
-                  className="h-max  mt-4 flex text-center mx-auto w-max py-1 px-2 rounded-md shadow-md text-white mx-auto bg-cyan-500 "
-                >
-                  See more
-                </Link>
-              ) : (
-                <></>
-              )}
-            </section>
+            <Detail
+              info={info.data.events}
+              type={"characters"}
+              datatype={"events"}
+              id={id}
+            />
           ) : (
             <></>
           )}
           {/* series */}
           {info.data.totalSeries > 0 ? (
-            <section className="bg-white py-2">
-              <h1
-                id="series"
-                className="text-center text-black text-[2em] font-bold pt-16"
-              >
-                Series
-              </h1>
-              <div className="md:auto-rows-[21rem] grid gap-4 grid-flow-dense auto-rows-[12rem] grid-cols-menu md:grid-cols-menu2 w-full place-items-center">
-                {info.data.series.data.length ? (
-                  info.data.series.data.map((comic) => (
-                    <CardList key={comic.id} data={comic} type={"series"} />
-                  ))
-                ) : (
-                  <></>
-                )}
-              </div>
-              {info.data.series.pages > 1 ? (
-                <Link
-                  to="series"
-                  className="h-max  mt-4 flex text-center mx-auto w-max py-1 px-2 rounded-md shadow-md text-white mx-auto bg-cyan-500 "
-                >
-                  See more
-                </Link>
-              ) : (
-                <></>
-              )}
-            </section>
+            <Detail
+              info={info.data.series}
+              type={"characters"}
+              datatype={"series"}
+              id={id}
+            />
           ) : (
             <></>
           )}
