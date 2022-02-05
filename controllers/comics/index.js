@@ -43,7 +43,7 @@ module.exports = {
 
     const nextComics = await getInfo("comics", {
       dateRange: newInfo,
-      limit: 5,
+      limit: 15,
       orderBy: "onsaleDate,modified",
     });
     res
