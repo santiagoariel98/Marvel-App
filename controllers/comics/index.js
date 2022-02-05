@@ -38,7 +38,9 @@ module.exports = {
       limit: 5,
       orderBy: "modified",
     });
-    res.send(nextComics).status(nextComics.success ? 200 : 400);
+    res
+      .send({ ...nextComics, nextDay, nextWeek })
+      .status(nextComics.success ? 200 : 400);
   },
   async getComicById(req, res) {
     const { id } = req.params;
