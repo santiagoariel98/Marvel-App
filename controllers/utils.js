@@ -301,17 +301,24 @@ const getType = (str = "") => {
   const split = str.split("/");
   return split[split.length - 1];
 };
+
+const getTotalItems = async (id, type, datatype, q) => {
+  const queries = getValidQueries(datatype, { ...q });
+  return await axios
+    .get(
+      `https://gateway.marvel.com/v1/public/${type}/${id}/${datatype}${MARVEL_API}&${queries}`
+    )
+    .then(({ data }) => data.data.total);
+};
+
 const getListsOfDataFromAnId = async (id, type, q = {}, dataType) => {
   try {
     const limit = q.limit || 20;
     const page = q.page > 1 ? Math.ceil(q.page) : 1;
-    const items = q.items || false;
-    let pages;
-    if (items) {
-      pages = items / limit > 1 ? Math.ceil(items / limit) : 1;
-    } else {
-      pages = await getTotalPagesOfDataList(id, type, dataType, limit);
-    }
+
+    let items = await getTotalItems(id, type, dataType, { ...q, limit });
+
+    let pages = items / limit > 1 ? Math.ceil(items / limit) : 1;
 
     const offset = page > pages ? pages * limit - limit : page * limit - limit;
 
