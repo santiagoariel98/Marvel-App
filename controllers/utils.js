@@ -265,7 +265,7 @@ const getTotalPages = (type, limit) => {
 const getTotalPagesOfDataList = (id, type, dataType = "", limit) => {
   return axios
     .get(
-      `https://gateway.marvel.com/v1/public/${type}/${id}${MARVEL_API}&limit=1`
+      `https://gateway.marvel.com/v1/public/${type}/${id}/${dataType}${MARVEL_API}&limit=1`
     )
     .then(({ data }) => {
       let items = 1;
