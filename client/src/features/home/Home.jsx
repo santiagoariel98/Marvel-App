@@ -4,13 +4,13 @@ import {
   getEvents,
   getLastComics,
   getNewsComics,
-} from "../features/home/homeSlice";
+} from "./homeSlice";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 // import { Link } from "react-router-dom";
 
 //components
-import Card from "../components/Card";
+import Card from "../../components/Card";
 //carousel
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";

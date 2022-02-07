@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import video from "../video/Marvel Opening.mp4";
+import video from "../../video/Marvel Opening.mp4";
+
 function LandingPage() {
   return (
     <div className="pt-24 w-full h-full">

@@ -6,17 +6,19 @@ import CardList from "./CardList";
 
 //@mui
 import SearchIcon from "@mui/icons-material/Search";
+import OrderBy from "./OrderBy";
 
 function Detail({ info, type, id, datatype }) {
   const dispatch = useDispatch();
   const [page, setPage] = useState(1);
   const [input, setInput] = useState("");
+  const [sort, setSort] = useState("");
 
   const status = useSelector((state) => state.characters.status[datatype]);
 
   const handleChange = (e, value, q = {}) => {
     setPage(value);
-    if (input.length) {
+    if (input.length || sort.length) {
       handleSearch(e, value);
     } else if (value !== page) {
       dispatch(
@@ -29,16 +31,23 @@ function Detail({ info, type, id, datatype }) {
       );
     }
   };
-
   const handleSearch = (e, value) => {
     e.preventDefault();
     setPage(value > 1 ? value : 1);
     let q;
+
     if (["comics", "series"].includes(datatype)) {
       q = { titleStartsWith: input };
     } else if (["events", "creators", "characters"].includes(datatype)) {
       q = { nameStartsWith: input };
     }
+    if (e.target.name === "orderBy") {
+      setSort(e.target.value);
+      q = e.target.value ? { ...q, orderBy: e.target.value } : { ...q };
+    } else if (sort) {
+      q = { ...q, orderBy: sort };
+    }
+
     dispatch(
       getDatatypeInfo({
         type,
@@ -58,7 +67,7 @@ function Detail({ info, type, id, datatype }) {
         </h1>
         <form
           onSubmit={handleSearch}
-          className="text-slate-600 flex flex-col items-end"
+          className="text-slate-600 flex flex-col items-end lg:flex-row"
         >
           <label className="bg-gray-200 px-2 py-1 rounded-full w-max">
             <SearchIcon />
@@ -71,14 +80,7 @@ function Detail({ info, type, id, datatype }) {
               placeholder={`Search ${datatype}`}
             />
           </label>
-          <select className="mt-2 rounded bg-gray-200 px-2 py-1 rounded-full">
-            <option value="" default>
-              Sort
-            </option>
-            <option>Sort 1</option>
-            <option>Sort 2</option>
-            <option>Sort 3</option>
-          </select>
+          <OrderBy type={datatype} cb={handleSearch} />
         </form>
       </div>
       <div className="md:auto-rows-[21rem] grid gap-4 grid-flow-dense auto-rows-[12rem] grid-cols-menu md:grid-cols-menu2 w-full place-items-center">

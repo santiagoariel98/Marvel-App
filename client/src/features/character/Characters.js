@@ -1,17 +1,16 @@
 import React, { useEffect } from "react";
 // components
-import "react-multi-carousel/lib/styles.css";
-import Loading from "../components/Loading";
+import Loading from "../../components/Loading";
 
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 
 //redux
-import { getCharacterByIdAsync } from "../features/character/characterSlice";
-import Detail from "../components/Detail";
+import { getCharacterByIdAsync } from "./characterSlice";
+import Detail from "../../components/Detail";
 
-function CharactersDetail() {
+function Characters() {
   const { id } = useParams();
   const dispatch = useDispatch();
 
@@ -115,4 +114,4 @@ function CharactersDetail() {
   );
 }
 
-export default CharactersDetail;
+export default Characters;
