@@ -14,9 +14,13 @@ export function fetchGetCharacterById(id) {
 
 export function fetchGetData(data) {
   const { type, id, datatype, pages } = data;
+  let q = data.q ? data.q : {};
+  let query = Object.entries(q)
+    .map((e) => e.join("="))
+    .join("&");
   return axios
     .get(
-      `https://marvel-api-sv.herokuapp.com/api/${type}/${id}/${datatype}?page=${pages}`
+      `https://marvel-api-sv.herokuapp.com/api/${type}/${id}/${datatype}?page=${pages}&${query}`
     )
     .then(({ data }) => ({ data, datatype }));
 }
