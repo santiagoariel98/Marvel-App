@@ -84,9 +84,15 @@ function Detail({ info, type, id, datatype }) {
         </form>
       </div>
       <div className="md:auto-rows-[21rem] grid gap-4 grid-flow-dense auto-rows-[12rem] grid-cols-menu md:grid-cols-menu2 w-full place-items-center">
-        {info.data.map((data) => (
-          <CardList key={data.id} data={data} type={datatype} status={status} />
-        ))}
+        {info.data &&
+          info.data.map((data) => (
+            <CardList
+              key={data.id}
+              data={data}
+              type={datatype}
+              status={status}
+            />
+          ))}
       </div>
       <Pagination
         count={info.pages}

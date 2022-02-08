@@ -26,7 +26,7 @@ function Card({ data, type }) {
       </div>
       {data.title && type !== "comics" && data.desc ? (
         <div className="h-full opacity-0 top-0 text-white bottom-0 px-2 text-sm items-center absolute top-0 flex justify-center left-0 right-0 my-0 mx-auto bg-lightgray transition-all group-hover:opacity-100 group-hover:bg-black/90 pt-4 group-active:opacity-0 rounded-md">
-          {data.desc}
+          <p className="line-clamp-9">{data.desc}</p>
         </div>
       ) : (
         <></>

@@ -21,7 +21,7 @@ function CardList({ data, type, status }) {
       </div>
 
       <div className="h-max text-[0.6em] text-center font-bold items-center absolute top-0 flex justify-center left-0 right-0 my-0 mx-auto bg-lightgray opacity-0 transition-all group-hover:opacity-100 group-hover:bg-white group-hover:top-2 border-y-2 border-gray-300 group-active:opacity-0 md:text-[1em]">
-        <p>{data.title ? data.title : data.name}</p>
+        <p>{data.title ? data.title : data.name ? data.name : data.fullname}</p>
       </div>
       <Link
         to={`/${type}/${data.id}`}

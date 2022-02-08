@@ -10,7 +10,7 @@ import { useParams } from "react-router-dom";
 import { getCharacterByIdAsync } from "./characterSlice";
 import Detail from "../../components/Detail";
 
-function Characters() {
+function CharacterDetail() {
   const { id } = useParams();
   const dispatch = useDispatch();
 
@@ -114,4 +114,4 @@ function Characters() {
   );
 }
 
-export default Characters;
+export default CharacterDetail;

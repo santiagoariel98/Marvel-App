@@ -11,7 +11,8 @@ import Loading from "./components/Loading";
 //pages
 import Home from "./features/home/Home";
 import LandingPage from "./features/landingPage/LandingPage";
-import Characters from "./features/character/Characters";
+import CharacterDetail from "./features/character/CharacterDetail";
+import SerieDetail from "./features/serie/SerieDetail";
 
 function App() {
   const status = useSelector((state) => state.home.status);
@@ -23,7 +24,8 @@ function App() {
       <Routes>
         <Route exact path="/" element={<LandingPage />} />
         <Route path="/home" element={<Home />} />
-        <Route path="/characters/:id" element={<Characters />} />
+        <Route path="/characters/:id" element={<CharacterDetail />} />
+        <Route path="/series/:id" element={<SerieDetail />} />
       </Routes>
     </BrowserRouter>
   );

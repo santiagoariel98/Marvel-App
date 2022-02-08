@@ -2,6 +2,9 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      lineClamp: {
+        9: 9,
+      },
       gridTemplateColumns: {
         menu: "repeat(auto-fill, minmax(10em, 1fr))",
         menu2: "repeat(auto-fill, minmax(17.5em, 1fr))",
@@ -46,5 +49,5 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [require("@tailwindcss/line-clamp")],
 };

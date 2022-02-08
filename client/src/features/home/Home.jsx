@@ -4,6 +4,7 @@ import {
   getEvents,
   getLastComics,
   getNewsComics,
+  getSeries,
 } from "./homeSlice";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
@@ -39,12 +40,14 @@ function Home() {
   const events = useSelector((state) => state.home.events);
   const newsComics = useSelector((state) => state.home.newsComics);
   const lastComics = useSelector((state) => state.home.lastComics);
-  new Date().toDateString();
+  const series = useSelector((state) => state.home.series);
+
   useEffect(() => {
     dispatch(getCharacters());
     dispatch(getEvents());
     dispatch(getLastComics());
     dispatch(getNewsComics());
+    dispatch(getSeries());
   }, [dispatch]);
 
   return (
@@ -73,6 +76,21 @@ function Home() {
         {events.length ? (
           events.map((event) => (
             <Card key={event.id} data={event} type={"events"} />
+          ))
+        ) : (
+          <></>
+        )}
+      </Carousel>
+      <h1> Series</h1>
+      <Carousel
+        ssr
+        partialVisibile
+        itemClass="image-item"
+        responsive={responsive}
+      >
+        {series.length ? (
+          series.map((serie) => (
+            <Card key={serie.id} data={serie} type={"series"} />
           ))
         ) : (
           <></>

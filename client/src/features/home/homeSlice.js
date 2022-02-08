@@ -99,7 +99,7 @@ export const homeSlice = createSlice({
       .addCase(getNewsComics.fulfilled, (state, action) => {
         state.status = "idle";
         if (action.payload.success) {
-          state.newsComics = action.payload.data.slice(1);
+          state.newsComics = action.payload.data;
         } else {
           state.error = "Comics not founds";
         }
@@ -111,9 +111,21 @@ export const homeSlice = createSlice({
       .addCase(getLastComics.fulfilled, (state, action) => {
         state.status = "idle";
         if (action.payload.success) {
-          state.lastComics = action.payload.data.slice(1);
+          state.lastComics = action.payload.data;
         } else {
           state.error = "Comics not founds";
+        }
+      });
+    builder
+      .addCase(getSeries.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(getSeries.fulfilled, (state, action) => {
+        state.status = "idle";
+        if (action.payload.success) {
+          state.series = action.payload.data;
+        } else {
+          state.error = "Series not founds";
         }
       });
   },
