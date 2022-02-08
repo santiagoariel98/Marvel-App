@@ -15,6 +15,6 @@ export const store = configureStore({
     creators: creatorReducer,
     series: serieReducer,
     home: homeReducer,
-    event: eventReducer,
+    events: eventReducer,
   },
 });

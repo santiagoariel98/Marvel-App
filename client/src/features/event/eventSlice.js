@@ -59,6 +59,7 @@ export const creatorSlice = createSlice({
       .addCase(getDataById.fulfilled, (state, action) => {
         state.status.general = "idle";
         if (action.payload.success) {
+          console.log(action.payload);
           state.current = action.payload;
         } else {
           state.errorMsg = [...state.errorMsg, action.payload.error];

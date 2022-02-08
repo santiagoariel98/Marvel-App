@@ -24,7 +24,7 @@ function Buttons({ data }) {
       {/* Creators */}
       {data.totalCreators > 0 ? (
         <a href="#creators" className="bg-red-500 px-4 py-2">
-          Comics
+          Creators
         </a>
       ) : (
         <></>

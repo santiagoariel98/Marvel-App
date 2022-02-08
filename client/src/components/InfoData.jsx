@@ -8,10 +8,10 @@ function InfoData({ data }) {
         <img
           src={data.img}
           alt={data.name || data.title || data.fullname}
-          className="w-screen mx-auto object-cover pt-16 md:w-[35em] md:h-[35em] md:object-contain md:rounded-sm md:pt-20 md:mr-8 "
+          className="h-[100vw] mx-auto object-cover pt-16 md:w-[35em] md:h-[35em] md:object-contain md:rounded-sm md:pt-20 md:mr-8 "
         />
       </div>
-      <div className="px-4 text-white text-left w-screen pt-4 absolute pb-4 min-h-[11em] bg-black md:top-[40%] md:bg-transparent md:left-0 md:max-w-[35em]">
+      <div className="px-4 text-white text-left w-screen pt-4 bottom-0 absolute pb-4 min-h-[11em] bg-black/80 md:top-[40%] md:bg-transparent md:left-0 md:max-w-[35em]">
         <h1 className="text-2xl font-bold mb-2 md:text-[3em] md:mb-8">
           {data.name || data.title || data.fullname}
         </h1>

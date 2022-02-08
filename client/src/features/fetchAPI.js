@@ -7,6 +7,7 @@ export const fetchData = ({ type }) => {
 };
 
 export const fetchDataById = ({ type, id }) => {
+  console.log(type, id);
   return axios(`${URL_API}${type}/${id}`).then(({ data }) => data);
 };
 

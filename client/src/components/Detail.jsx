@@ -64,7 +64,7 @@ function Detail({ info, type, id, datatype, cb }) {
   };
 
   return (
-    <section className="bg-white py-2 ">
+    <section className="bg-white py-2 " id={datatype}>
       <div className="flex justify-between px-4 items-center">
         <h1 className="text-black text-[2.5em] font-bold" id={`#${datatype}`}>
           {datatype.charAt(0).toUpperCase() + datatype.slice(1)}

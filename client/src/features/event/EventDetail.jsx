@@ -17,7 +17,6 @@ function EventDetail() {
 
   const info = useSelector((state) => state[type].current);
   const status = useSelector((state) => state[type].status.general);
-
   useEffect(() => {
     if (!info.data || +info.data.id !== +id)
       dispatch(getDataById({ type, id }));

@@ -22,7 +22,6 @@ function ComicDetail() {
     if (!info.data || +info.data.id !== +id)
       dispatch(getDataById({ type, id }));
   }, [id, dispatch, info.data]);
-
   return (
     <div className="bg-black">
       {status === "loading" ? <Loading /> : <></>}
