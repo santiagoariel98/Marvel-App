@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 //redux
 import { useSelector, useDispatch } from "react-redux";
-import { getDataById, getSubdata } from "./characterSlice";
+import { getDataById, getSubdata } from "./comicSlice";
 //react router dom
 import { useParams } from "react-router-dom";
 // components
@@ -9,8 +9,8 @@ import Loading from "../../components/Loading";
 import Details from "../../components/Details";
 import InfoData from "../../components/InfoData";
 
-function CharacterDetail() {
-  const type = "characters";
+function ComicDetail() {
+  const type = "comics";
 
   const { id } = useParams();
   const dispatch = useDispatch();
@@ -38,4 +38,4 @@ function CharacterDetail() {
   );
 }
 
-export default CharacterDetail;
+export default ComicDetail;

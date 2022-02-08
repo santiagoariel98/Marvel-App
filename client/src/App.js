@@ -12,6 +12,9 @@ import Loading from "./components/Loading";
 import Home from "./features/home/Home";
 import LandingPage from "./features/landingPage/LandingPage";
 import CharacterDetail from "./features/character/CharacterDetail";
+import ComicDetail from "./features/comic/ComicDetail";
+import CreatorDetail from "./features/creator/CreatorDetail";
+import EventDetail from "./features/event/EventDetail";
 import SerieDetail from "./features/serie/SerieDetail";
 
 function App() {
@@ -25,6 +28,9 @@ function App() {
         <Route exact path="/" element={<LandingPage />} />
         <Route path="/home" element={<Home />} />
         <Route path="/characters/:id" element={<CharacterDetail />} />
+        <Route path="/comics/:id" element={<ComicDetail />} />
+        <Route path="/creators/:id" element={<CreatorDetail />} />
+        <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/series/:id" element={<SerieDetail />} />
       </Routes>
     </BrowserRouter>

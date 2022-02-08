@@ -1,20 +1,19 @@
 import { Pagination } from "@mui/material";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getDatatypeInfo } from "../features/character/characterSlice";
 import CardList from "./CardList";
 
 //@mui
 import SearchIcon from "@mui/icons-material/Search";
 import OrderBy from "./OrderBy";
 
-function Detail({ info, type, id, datatype }) {
+function Detail({ info, type, id, datatype, cb }) {
   const dispatch = useDispatch();
   const [page, setPage] = useState(1);
   const [input, setInput] = useState("");
   const [sort, setSort] = useState("");
 
-  const status = useSelector((state) => state.characters.status[datatype]);
+  const status = useSelector((state) => state[type].status[datatype]);
 
   const handleChange = (e, value, q = {}) => {
     setPage(value);
@@ -22,11 +21,13 @@ function Detail({ info, type, id, datatype }) {
       handleSearch(e, value);
     } else if (value !== page) {
       dispatch(
-        getDatatypeInfo({
+        cb({
           type,
           id,
           datatype,
-          pages: value,
+          q: {
+            page: value,
+          },
         })
       );
     }
@@ -49,12 +50,15 @@ function Detail({ info, type, id, datatype }) {
     }
 
     dispatch(
-      getDatatypeInfo({
+      cb({
         type,
         id,
         datatype,
         pages: value > 1 ? value : 1,
-        q,
+        q: {
+          ...q,
+          page: value > 1 ? value : 1,
+        },
       })
     );
   };

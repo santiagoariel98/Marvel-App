@@ -1,9 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import {
-  fetchGetCharacterById,
-  fetchGetCharacters,
-  fetchGetData,
-} from "./characterAPI";
+import { fetchData, fetchDataById, fetchSubDataById } from "../fetchAPI";
 
 const initialState = {
   status: {
@@ -12,99 +8,78 @@ const initialState = {
     events: "idle",
     series: "idle",
   },
-  currentCharacters: [],
-  currentCharacter: {},
-  errorMsg: "",
+  results: [],
+  current: {},
+  errorMsg: [],
 };
 
-export const getCharactersAsync = createAsyncThunk(
-  "character/getCharacters",
-  async () => {
-    const response = await fetchGetCharacters();
-    return response;
-  }
-);
-export const getDatatypeInfo = createAsyncThunk(
-  "character/getDatatypeInfo",
+export const getData = createAsyncThunk("characters/getData", async (data) => {
+  const response = await fetchData(data);
+  return response;
+});
+
+export const getDataById = createAsyncThunk(
+  "characters/getDataById",
   async (data) => {
-    const response = await fetchGetData(data);
+    const response = await fetchDataById(data);
     return response;
   }
 );
-export const getCharacterByIdAsync = createAsyncThunk(
-  "character/getCharacterById",
-  async (id) => {
-    const response = await fetchGetCharacterById(id);
+
+export const getSubdata = createAsyncThunk(
+  "characters/getSubdata",
+  async (data) => {
+    const response = await fetchSubDataById(data);
     return response;
   }
 );
+
 export const characterSlice = createSlice({
   name: "characters",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(getCharactersAsync.pending, (state) => {
+      .addCase(getData.pending, (state) => {
         state.status.general = "loading";
       })
-      .addCase(getCharactersAsync.fulfilled, (state, action) => {
+      .addCase(getData.fulfilled, (state, action) => {
         state.status.general = "idle";
         if (action.payload.success) {
-          state.currentCharacters = action.payload.data;
+          state.characters = action.payload.data;
         } else {
-          state.errorMsg = "Se ha producido un Problema";
+          state.errorMsg = [...state.errorMsg, action.payload.error];
         }
       });
-
     builder
-      .addCase(getCharacterByIdAsync.pending, (state) => {
+      .addCase(getDataById.pending, (state) => {
         state.status.general = "loading";
       })
-      .addCase(getCharacterByIdAsync.fulfilled, (state, action) => {
+      .addCase(getDataById.fulfilled, (state, action) => {
         state.status.general = "idle";
         if (action.payload.success) {
-          state.currentCharacter = action.payload;
+          state.current = action.payload;
         } else {
-          state.errorMsg = "Se ha producido un Problema";
+          state.errorMsg = [...state.errorMsg, action.payload.error];
         }
       });
-
     builder
-      .addCase(getDatatypeInfo.pending, (state, action) => {
-        if (action.meta.arg.datatype === "comics") {
-          state.status.comics = "loading";
-        }
-        if (action.meta.arg.datatype === "events") {
-          state.status.events = "loading";
-        }
-        if (action.meta.arg.datatype === "series") {
-          state.status.series = "loading";
-        }
+      .addCase(getSubdata.pending, (state, action) => {
+        let datatype = action.meta.arg.datatype;
+        state.status[datatype] = "loading";
       })
-      .addCase(getDatatypeInfo.fulfilled, (state, action) => {
-        let status = action.payload.data.success;
+      .addCase(getSubdata.fulfilled, (state, action) => {
+        let success = action.payload.data.success;
         let datatype = action.payload.datatype;
-        if (status && datatype === "comics") {
-          state.status.comics = "idle";
-          state.currentCharacter.data.comics = action.payload.data;
-        } else if (status && datatype === "events") {
-          state.status.events = "idle";
-          state.currentCharacter.data.events = action.payload.data;
-        } else if (status && datatype === "series") {
-          state.status.series = "idle";
-          state.currentCharacter.data.series = action.payload.data;
+        state.status[datatype] = "idle";
+
+        if (success) {
+          state.current.data[datatype] = action.payload.data;
         } else {
-          state.status.comics = "idle";
-          state.status.events = "idle";
-          state.status.series = "idle";
+          state.errorMsg = [...state.errorMsg, action.payload.error];
         }
       });
   },
 });
-
-export const selectPageCharacter = (state) => state.characters.page;
-export const selectStatusCharacter = (state) => state.characters.status;
-export const selectCurrentCharacters = (state) =>
-  state.characters.currentCharacters;
 
 export default characterSlice.reducer;

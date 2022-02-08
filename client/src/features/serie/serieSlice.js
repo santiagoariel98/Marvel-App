@@ -9,28 +9,31 @@ const initialState = {
     events: "idle",
     comics: "idle",
   },
-  series: [],
-  currentSerie: {},
+  results: [],
+  current: {},
   errorMsg: [],
 };
 
-export const getData = createAsyncThunk("serie/getData", async (data) => {
+export const getData = createAsyncThunk("series/getData", async (data) => {
   const response = await fetchData(data);
   return response;
 });
 
 export const getDataById = createAsyncThunk(
-  "serie/getDataById",
+  "series/getDataById",
   async (data) => {
     const response = await fetchDataById(data);
     return response;
   }
 );
 
-export const getSubdata = createAsyncThunk("serie/getSubdata", async (data) => {
-  const response = await fetchSubDataById(data);
-  return response;
-});
+export const getSubdata = createAsyncThunk(
+  "series/getSubdata",
+  async (data) => {
+    const response = await fetchSubDataById(data);
+    return response;
+  }
+);
 
 export const serieSlice = createSlice({
   name: "series",
@@ -44,7 +47,7 @@ export const serieSlice = createSlice({
       .addCase(getData.fulfilled, (state, action) => {
         state.status.general = "idle";
         if (action.payload.success) {
-          state.series = action.payload.data;
+          state.results = action.payload.data;
         } else {
           state.errorMsg = [...state.errorMsg, action.payload.error];
         }
@@ -56,7 +59,7 @@ export const serieSlice = createSlice({
       .addCase(getDataById.fulfilled, (state, action) => {
         state.status.general = "idle";
         if (action.payload.success) {
-          state.currentSerie = action.payload;
+          state.current = action.payload;
         } else {
           state.errorMsg = [...state.errorMsg, action.payload.error];
         }
@@ -72,7 +75,7 @@ export const serieSlice = createSlice({
         state.status[datatype] = "idle";
 
         if (success) {
-          state.currentSerie.data[datatype] = action.payload.data;
+          state.current.data[datatype] = action.payload.data;
         } else {
           state.errorMsg = [...state.errorMsg, action.payload.error];
         }

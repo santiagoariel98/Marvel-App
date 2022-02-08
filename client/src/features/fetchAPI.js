@@ -14,7 +14,7 @@ export const fetchSubDataById = ({ type, id, datatype, q = {} }) => {
   let query = Object.entries(q)
     .map((e) => e.join("="))
     .join("&");
-  return axios(`${URL_API}${type}/${id}/${datatype}&${query}`).then(
+  return axios(`${URL_API}${type}/${id}/${datatype}?${query}`).then(
     ({ data }) => ({
       data,
       datatype,
