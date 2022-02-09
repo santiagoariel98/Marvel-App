@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 //components
 import Navbar from "./components/Navbar";
 import Loading from "./components/Loading";
+import Headboard from "./components/Headboard";
 
 //pages
 import Home from "./features/home/Home";
@@ -32,6 +33,7 @@ function App() {
         <Route path="/creators/:id" element={<CreatorDetail />} />
         <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/series/:id" element={<SerieDetail />} />
+        <Route path="/characters" element={<Headboard type={"characters"} />} />
       </Routes>
     </BrowserRouter>
   );

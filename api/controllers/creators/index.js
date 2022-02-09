@@ -1,6 +1,6 @@
 const type = "creators";
 
-const { getInfo, getListsOfDataFromAnId } = require("../utils");
+const { getInfo, getListsOfDataFromAnId, getInfoById } = require("../utils");
 
 module.exports = {
   async getAllCreators(req, res) {
@@ -12,7 +12,6 @@ module.exports = {
   async getCreatorById(req, res) {
     const { id } = req.params;
     const dataID = await getInfoById(id, type);
-    console.log(dataID);
     res.send(dataID).status(dataID.success ? 200 : 400);
   },
   async getComicsCreator(req, res) {

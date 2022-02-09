@@ -1,6 +1,6 @@
 const type = "events";
 
-const { getInfo, getListsOfDataFromAnId } = require("../utils");
+const { getInfo, getListsOfDataFromAnId, getInfoById } = require("../utils");
 
 module.exports = {
   async getAllEvents(req, res) {

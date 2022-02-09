@@ -207,6 +207,7 @@ const getById = (id, type) => {
       error: `${type.slice(0, -1)} not found`,
     }));
 };
+
 const getValidSort = (dataType, options = "") => {
   let orderBy = {};
   if (dataType === "characters") {

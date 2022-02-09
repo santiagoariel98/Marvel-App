@@ -7,7 +7,7 @@ import { useParams } from "react-router-dom";
 // components
 import Loading from "../../components/Loading";
 import Details from "../../components/Details";
-import InfoData from "../../components/InfoData";
+import Masthead from "../../components/Masthead";
 
 function ComicDetail() {
   const type = "comics";
@@ -27,7 +27,7 @@ function ComicDetail() {
       {status === "loading" ? <Loading /> : <></>}
       {info && info.data && info.success ? (
         <>
-          <InfoData data={info.data} />
+          <Masthead type={type} data={[info.data]} />
           <Details data={info.data} type={type} cb={getSubdata} />
         </>
       ) : (

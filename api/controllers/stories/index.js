@@ -1,6 +1,6 @@
 const type = "stories";
 
-const { getInfo, getListsOfDataFromAnId } = require("../utils");
+const { getInfo, getListsOfDataFromAnId, getInfoById } = require("../utils");
 
 module.exports = {
   async getAllStories(req, res) {
