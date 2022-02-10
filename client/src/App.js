@@ -7,7 +7,6 @@ import { useSelector } from "react-redux";
 //components
 import Navbar from "./components/Navbar";
 import Loading from "./components/Loading";
-import Headboard from "./components/Headboard";
 
 //pages
 import Home from "./features/home/Home";
@@ -17,6 +16,12 @@ import ComicDetail from "./features/comic/ComicDetail";
 import CreatorDetail from "./features/creator/CreatorDetail";
 import EventDetail from "./features/event/EventDetail";
 import SerieDetail from "./features/serie/SerieDetail";
+//pages
+import Character from "./features/character/Character";
+import Comic from "./features/comic/Comic";
+import Creator from "./features/creator/Creator";
+import Event from "./features/event/Event";
+import Serie from "./features/serie/Serie";
 
 function App() {
   const status = useSelector((state) => state.home.status);
@@ -33,7 +38,12 @@ function App() {
         <Route path="/creators/:id" element={<CreatorDetail />} />
         <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/series/:id" element={<SerieDetail />} />
-        <Route path="/characters" element={<Headboard type={"characters"} />} />
+        {/* Pages */}
+        <Route path="/characters" element={<Character type={"characters"} />} />
+        <Route path="/comics" element={<Comic type={"comics"} />} />
+        <Route path="/creators" element={<Creator type={"creators"} />} />
+        <Route path="/events" element={<Event type={"events"} />} />
+        <Route path="/series" element={<Serie type={"series"} />} />
       </Routes>
     </BrowserRouter>
   );

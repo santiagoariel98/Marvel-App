@@ -1,12 +1,12 @@
 import React from "react";
-import Detail from "./Detail";
+import Search from "./Search";
 
 function Details({ data, type, cb }) {
   return (
     <>
       {/* characters */}
       {data.totalCharacters > 0 ? (
-        <Detail
+        <Search
           info={data.characters}
           type={type}
           datatype={"characters"}
@@ -18,7 +18,7 @@ function Details({ data, type, cb }) {
       )}
       {/* comics */}
       {data.totalComics > 0 ? (
-        <Detail
+        <Search
           info={data.comics}
           type={type}
           datatype={"comics"}
@@ -30,7 +30,7 @@ function Details({ data, type, cb }) {
       )}
       {/* creators */}
       {data.totalCreators > 0 ? (
-        <Detail
+        <Search
           info={data.creators}
           type={type}
           datatype={"creators"}
@@ -42,7 +42,7 @@ function Details({ data, type, cb }) {
       )}
       {/* events */}
       {data.totalEvents > 0 ? (
-        <Detail
+        <Search
           info={data.events}
           type={type}
           datatype={"events"}
@@ -54,7 +54,7 @@ function Details({ data, type, cb }) {
       )}
       {/* series */}
       {data.totalSeries > 0 ? (
-        <Detail
+        <Search
           info={data.series}
           type={type}
           datatype={"series"}

@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 
 import SearchIcon from "@mui/icons-material/Search";
 import { Pagination } from "@mui/material";
-import OrderBy from "./OrderBy";
+import Sort from "./Sort";
 import CardList from "./CardList";
 
 function Search({ info, type, id, datatype, cb }) {
@@ -40,12 +40,16 @@ function Search({ info, type, id, datatype, cb }) {
       setSort(e.target.value);
     }
     let send = datatype && id ? `${type}/${id}/${datatype}` : type;
-    dispatch(cb({ type: send, q }));
+    if (datatype && id) {
+      dispatch(cb.getSubdata({ type, id, datatype, q }));
+    } else {
+      dispatch(cb.getData({ type: send, q }));
+    }
   };
 
   return (
     <section className="bg-white py-2 " id={datatype || type}>
-      <div className="flex justify-between px-4 items-center">
+      <div className="flex justify-between px-4 items-center pb-4">
         <h1
           className="text-black text-[2.5em] font-bold uppercase"
           id={`#${datatype || type}`}
@@ -54,7 +58,7 @@ function Search({ info, type, id, datatype, cb }) {
         </h1>
         <form
           onSubmit={handleSearch}
-          className="text-slate-600 flex flex-col items-end lg:flex-row"
+          className="text-slate-600 flex flex-col items-end md:flex-row"
         >
           <label className="bg-gray-200 px-2 py-1 rounded-full w-max">
             <SearchIcon />
@@ -67,7 +71,7 @@ function Search({ info, type, id, datatype, cb }) {
               placeholder={`Search ${datatype || type}`}
             />
           </label>
-          <OrderBy type={datatype || type} cb={handleSearch} />
+          <Sort type={datatype || type} cb={handleSearch} />
         </form>
       </div>
       {info.data?.length ? (

@@ -2,7 +2,6 @@ import React from "react";
 import Buttons from "./Buttons";
 
 function Masthead({ type, data = [] }) {
-  const width = Math.floor(100 / data.length);
   return (
     <section
       id={`#${type}`}
@@ -44,7 +43,7 @@ function Masthead({ type, data = [] }) {
             <img
               key={e.id || i}
               src={e.img}
-              className={`w-[${width}vw] h-[80vh] object-cover select-none blur-[2px] pt-4`}
+              className={`w-[20vw] h-[80vh] object-cover select-none blur-[2px] pt-4`}
               alt={e.title || e.name || e.fullname}
             />
           ))}

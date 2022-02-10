@@ -9,7 +9,6 @@ function Card({ data, type }) {
     >
       {type === "comics" ? (
         <div className="w-full h-full absolute overflow-hidden group-hover:bg-black/50 rounded-md group-active:bg-transparent">
-          {/* <div class="cr cr-bottom cr-right cr-sticky cr-green">Hello</div> */}
           <div className="opacity-0 transition-all border-y-2 border-gray-300 group-hover:opacity-100 w-48 px-4 py-1 text-center absolute text-blue bottom-5 -right-14 fixed -rotate-45 bg-red-500 overflow-hidden text-white">
             {data.price > 0 ? "$" + data.price : "FREE"}
           </div>
@@ -20,7 +19,7 @@ function Card({ data, type }) {
       <div className="rounded-md w-64 h-72">
         <img
           src={data.img}
-          alt={data.title ? data.title : data.name}
+          alt={data.name || data.title || data.fullname}
           className="object-cover rounded-md h-full w-full"
         />
       </div>
@@ -33,7 +32,7 @@ function Card({ data, type }) {
       )}
 
       <div className="text-center font-bold text-base items-center absolute top-0 left-0 right-0 my-0 mx-auto bg-lightgray opacity-0 transition-all group-hover:opacity-100 group-hover:bg-white group-hover:top-5 border-y-2 border-gray-300 group-active:opacity-0">
-        <p>{data.title ? data.title : data.name}</p>
+        <p>{data.name || data.title || data.fullname}</p>
         {data.onsale ? (
           <p className="text-center text-[0.8em] w-max mx-auto">
             -

@@ -1,6 +1,6 @@
 import React from "react";
 
-function OrderBy({ type, cb }) {
+function Sort({ type, cb }) {
   return (
     <select
       onChange={(e) => cb(e)}
@@ -34,4 +34,4 @@ function OrderBy({ type, cb }) {
   );
 }
 
-export default OrderBy;
+export default Sort;

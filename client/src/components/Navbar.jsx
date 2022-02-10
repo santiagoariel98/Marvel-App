@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Transition } from "@headlessui/react";
 import { Link } from "react-router-dom";
-import logo from "../logo.svg";
+import logo from "../icon.svg";
 
 function Nav() {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,28 +25,28 @@ function Nav() {
                 </Link>
 
                 <Link
-                  to="#"
+                  to="/comics"
                   className="text-gray-300 hover:bg-red-900 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Comics
                 </Link>
 
                 <Link
-                  to="#"
+                  to="/events"
                   className="text-gray-300 hover:bg-red-900 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Events
                 </Link>
 
                 <Link
-                  to="#"
+                  to="/series"
                   className="text-gray-300 hover:bg-red-900 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Series
                 </Link>
 
                 <Link
-                  to="#"
+                  to="/creators"
                   className="text-gray-300 hover:bg-red-900 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Creators

@@ -65,7 +65,7 @@ function Headboard({ type, cb }) {
         </Carousel>
       </section>
 
-      <Search info={info} type={type} cb={getData} />
+      <Search info={info} type={type} cb={{ getData }} />
     </div>
   );
 }

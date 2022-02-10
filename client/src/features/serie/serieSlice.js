@@ -1,5 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { fetchData, fetchDataById, fetchSubDataById } from "../fetchAPI";
+import {
+  fetchData,
+  fetchDataById,
+  fetchSubDataById,
+  fetchRandomData,
+} from "../fetchAPI";
 
 const initialState = {
   status: {
@@ -9,6 +14,7 @@ const initialState = {
     events: "idle",
     comics: "idle",
   },
+  headboard: [],
   results: [],
   current: {},
   errorMsg: [],
@@ -35,6 +41,14 @@ export const getSubdata = createAsyncThunk(
   }
 );
 
+export const getRandomData = createAsyncThunk(
+  "series/getRandomData",
+  async (data) => {
+    const response = await fetchRandomData(data);
+    return response;
+  }
+);
+
 export const serieSlice = createSlice({
   name: "series",
   initialState,
@@ -47,7 +61,19 @@ export const serieSlice = createSlice({
       .addCase(getData.fulfilled, (state, action) => {
         state.status.general = "idle";
         if (action.payload.success) {
-          state.results = action.payload.data;
+          state.results = action.payload;
+        } else {
+          state.errorMsg = [...state.errorMsg, action.payload.error];
+        }
+      });
+    builder
+      .addCase(getRandomData.pending, (state) => {
+        state.status.general = "loading";
+      })
+      .addCase(getRandomData.fulfilled, (state, action) => {
+        state.status.general = "idle";
+        if (action.payload.success) {
+          state.headboard = action.payload.data;
         } else {
           state.errorMsg = [...state.errorMsg, action.payload.error];
         }
