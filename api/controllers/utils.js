@@ -1,6 +1,15 @@
 const axios = require("axios");
 const MARVEL_API = process.env.MARVEL_API;
 
+const totalItems = ({ type, id, datatype }, q = {}) => {
+  type = id && datatype ? `${type}/${id}/${datatype}` : type;
+  datatype = datatype || type;
+  let queries = getValidQueries(datatype, { ...q, limit: 1 });
+  return axios
+    .get(`https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&${queries}`)
+    .then(({ data }) => data.data.total);
+};
+
 const getCurrentDate = () => {
   return new Date().toISOString().split("T")[0];
 };
@@ -250,38 +259,6 @@ const objToQueryString = (obj) => {
     .map((params) => params.join("="))
     .join("&");
 };
-const getTotalPages = (type, limit) => {
-  limit = limit > 1 ? (limit < 100 ? limit : 200) : 20;
-  return axios
-    .get(`https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&limit=1`)
-    .then(({ data }) => {
-      const items = data.data.total; // total items
-      const pages = items / limit > 1 ? Math.ceil(items / limit) : 1;
-      return +pages;
-    })
-    .catch((err) => {
-      return 1;
-    });
-};
-const getTotalPagesOfDataList = (id, type, dataType = "", limit) => {
-  return axios
-    .get(
-      `https://gateway.marvel.com/v1/public/${type}/${id}/${dataType}${MARVEL_API}&limit=1`
-    )
-    .then(({ data }) => {
-      let items = 1;
-      const result = data.data.results[0]; // total items
-
-      if (result.hasOwnProperty(dataType)) {
-        items = +result[dataType].available;
-      }
-      const pages = items / limit > 1 ? Math.ceil(items / limit) : 1;
-      return pages;
-    })
-    .catch((err) => {
-      throw new Error("Descripción del error");
-    });
-};
 
 const getValidQueries = (datatype, q = {}) => {
   if (!datatype) {
@@ -349,12 +326,16 @@ const getListsOfDataFromAnId = async (id, type, q = {}, dataType) => {
 };
 module.exports = {
   getListsOfDataFromAnId,
+
   async getInfo(type, q = {}) {
     const dataType = getType(type);
     const limit = q.limit || 20;
+
     const page = q.page > 1 ? Math.ceil(q.page) : 1;
 
-    const pages = await getTotalPages(type, limit);
+    let items = await totalItems({ type }, q);
+
+    let pages = items / limit > 1 ? Math.ceil(items / limit) : 1;
 
     const offset = page > pages ? pages * limit - limit : page * limit - limit;
 

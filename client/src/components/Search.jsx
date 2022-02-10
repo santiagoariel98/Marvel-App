@@ -17,14 +17,14 @@ function Search({ info, type, id, datatype, cb }) {
   );
 
   const handleSearch = (e, value) => {
-    let q = { sort };
+    let q = { orderBy: sort };
     e.preventDefault();
     if (["comics", "series"].includes(datatype || type)) {
-      q = { titleStartsWith: input };
+      q = { ...q, titleStartsWith: input };
     } else if (
       ["events", "creators", "characters"].includes(datatype || type)
     ) {
-      q = { nameStartsWith: input };
+      q = { ...q, nameStartsWith: input };
     }
 
     if (value && value !== page) {
@@ -39,6 +39,7 @@ function Search({ info, type, id, datatype, cb }) {
       q = { ...q, orderBy };
       setSort(e.target.value);
     }
+
     let send = datatype && id ? `${type}/${id}/${datatype}` : type;
     if (datatype && id) {
       dispatch(cb.getSubdata({ type, id, datatype, q }));

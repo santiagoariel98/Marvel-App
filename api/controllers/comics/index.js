@@ -8,6 +8,7 @@ const {
   getNextDay,
   getLastWeek,
   getNextWeek,
+  totalItems,
 } = require("../utils");
 
 module.exports = {
