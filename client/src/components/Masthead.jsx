@@ -5,7 +5,7 @@ function Masthead({ type, data = [] }) {
   return (
     <section
       id={`#${type}`}
-      className="w-screen h-screen bg-black relative overflow-x-hidden"
+      className="w-full h-screen bg-black relative overflow-x-hidden"
     >
       {data.length === 1 ? (
         <div className="md:flex md:flex-col md:justify-center px-8 text-white text-left bottom-0 md:top-0 md:my-auto absolute bg-black/90 md:bg-transparent md:left-0 md:max-w-[35em] z-[35] min-h-[25vh] py-4 w-screen">

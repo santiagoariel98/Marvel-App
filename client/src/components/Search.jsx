@@ -49,7 +49,7 @@ function Search({ info, type, id, datatype, cb }) {
   };
 
   return (
-    <section className="bg-white py-2 " id={datatype || type}>
+    <section className="bg-white py-2 w-full" id={datatype || type}>
       <div className="flex justify-between px-4 items-center pb-4">
         <h1
           className="text-black text-[2.5em] font-bold uppercase"

@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 //components
 import Navbar from "./components/Navbar";
 import Loading from "./components/Loading";
-
+// import Footer from "./components/Footer";
 //pages
 import Home from "./features/home/Home";
 import LandingPage from "./features/landingPage/LandingPage";
@@ -44,6 +44,7 @@ function App() {
         <Route path="/creators" element={<Creator type={"creators"} />} />
         <Route path="/events" element={<Event type={"events"} />} />
         <Route path="/series" element={<Serie type={"series"} />} />
+        {/* <Route path="/*" element={<Footer />} /> */}
       </Routes>
     </BrowserRouter>
   );

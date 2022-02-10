@@ -26,7 +26,7 @@ function Creator({ type }) {
         data={header}
         type={type}
         id={"newCreators"}
-        title="discover new Creators"
+        title="discover some Creators"
       />
       <Search info={info} type={type} cb={{ getData }} />
     </div>

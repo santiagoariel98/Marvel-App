@@ -27,7 +27,7 @@ const responsive = {
 
 function Slider({ data = [], title, id, type }) {
   return (
-    <section id={id || "carousel"} className="relative w-screen bg-white">
+    <section id={id || "carousel"} className="relative w-full bg-white">
       {title ? (
         <h1 className="uppercase md:text-[2em] text-[1.5em] mx-auto text-center text-black pt-4 font-bold">
           {title}
