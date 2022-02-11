@@ -28,7 +28,7 @@ function EventDetail() {
       {info && info.data && info.success ? (
         <>
           <Masthead type={type} data={[info.data]} />
-          <Details data={info.data} type={type} cb={getSubdata} />
+          <Details data={info.data} type={type} cb={{ getSubdata }} />
         </>
       ) : (
         <></>
