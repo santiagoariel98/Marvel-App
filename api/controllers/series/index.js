@@ -9,7 +9,7 @@ module.exports = {
     res.send(characters).status(characters.success ? 200 : 400);
   },
   async getNewsSeries(req, res) {
-    const series = await getInfo("series", {
+    const series = await getInfo(type, {
       limit: 10,
       startYear: 2022,
     });
@@ -23,47 +23,47 @@ module.exports = {
   },
   async getComicsSerie(req, res) {
     const { id } = req.params;
-    let dataType = "comics";
+    let datatype = "comics";
     const q = req.query;
 
-    const data = await getListsOfDataFromAnId(id, type, q, dataType);
+    const data = await getListsOfDataFromAnId(id, type, q, datatype);
 
     res.send(data).status(data.success ? 200 : 400);
   },
   async getCharactersSerie(req, res) {
     const { id } = req.params;
-    let dataType = "characters";
+    let datatype = "characters";
     const q = req.query;
 
-    const data = await getListsOfDataFromAnId(id, type, q, dataType);
+    const data = await getListsOfDataFromAnId(id, type, q, datatype);
 
     res.send(data).status(data.success ? 200 : 400);
   },
   async getCreatorsSerie(req, res) {
     const { id } = req.params;
-    let dataType = "creators";
+    let datatype = "creators";
     const q = req.query;
 
-    const data = await getListsOfDataFromAnId(id, type, q, dataType);
+    const data = await getListsOfDataFromAnId(id, type, q, datatype);
 
     res.send(data).status(data.success ? 200 : 400);
   },
   async getEventsSerie(req, res) {
     const { id } = req.params;
-    let dataType = "events";
+    let datatype = "events";
     const q = req.query;
 
-    const data = await getListsOfDataFromAnId(id, type, q, dataType);
+    const data = await getListsOfDataFromAnId(id, type, q, datatype);
 
     res.send(data).status(data.success ? 200 : 400);
   },
 
   async getStoriesSerie(req, res) {
     const { id } = req.params;
-    let dataType = "stories";
+    let datatype = "stories";
     const q = req.query;
 
-    const data = await getListsOfDataFromAnId(id, type, q, dataType);
+    const data = await getListsOfDataFromAnId(id, type, q, datatype);
 
     res.send(data).status(data.success ? 200 : 400);
   },

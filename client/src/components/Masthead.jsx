@@ -38,7 +38,7 @@ function Masthead({ type, data = [] }) {
           />
         </div>
       ) : data.length > 1 ? (
-        <div className="absolute flex select-none inset-0 items-center mx-auto justify-center">
+        <div className="fixed flex select-none inset-0 items-center mx-auto justify-center">
           {data.map((e, i) => (
             <img
               key={e.id || i}

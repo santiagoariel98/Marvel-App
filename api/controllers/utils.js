@@ -275,39 +275,26 @@ const getValidQueries = (datatype, q = {}) => {
 
   return queries;
 };
-const getType = (str = "") => {
-  const split = str.split("/");
-  return split[split.length - 1];
-};
 
-const getTotalItems = async (id, type, datatype, q) => {
-  const queries = getValidQueries(datatype, { ...q });
-  return await axios
-    .get(
-      `https://gateway.marvel.com/v1/public/${type}/${id}/${datatype}${MARVEL_API}&${queries}`
-    )
-    .then(({ data }) => data.data.total);
-};
-
-const getListsOfDataFromAnId = async (id, type, q = {}, dataType) => {
+const getListsOfDataFromAnId = async (id, type, q = {}, datatype) => {
   try {
     const limit = q.limit || 20;
     const page = q.page > 1 ? Math.ceil(q.page) : 1;
 
-    let items = await getTotalItems(id, type, dataType, { ...q, limit });
+    const items = await totalItems({ type, id, datatype }, q);
 
     let pages = items / limit > 1 ? Math.ceil(items / limit) : 1;
 
     const offset = page > pages ? pages * limit - limit : page * limit - limit;
 
-    const queries = getValidQueries(dataType, { ...q, offset });
+    const queries = getValidQueries(datatype, { ...q, offset });
 
     return axios
       .get(
-        `https://gateway.marvel.com/v1/public/${type}/${id}/${dataType}${MARVEL_API}&${queries}`
+        `https://gateway.marvel.com/v1/public/${type}/${id}/${datatype}${MARVEL_API}&${queries}`
       )
       .then(({ data }) => {
-        const result = convertData(data.data.results, dataType);
+        const result = convertData(data.data.results, datatype);
         const available = data.data.total;
         return {
           success: true,
@@ -328,7 +315,6 @@ module.exports = {
   getListsOfDataFromAnId,
 
   async getInfo(type, q = {}) {
-    const dataType = getType(type);
     const limit = q.limit || 20;
 
     const page = q.page > 1 ? Math.ceil(q.page) : 1;
@@ -339,13 +325,13 @@ module.exports = {
 
     const offset = page > pages ? pages * limit - limit : page * limit - limit;
 
-    const queries = getValidQueries(dataType, { offset, ...q });
+    const queries = getValidQueries(type, { offset, ...q });
     return axios
       .get(
         `https://gateway.marvel.com/v1/public/${type}${MARVEL_API}&${queries}`
       )
       .then(({ data }) => {
-        const result = convertData(data.data.results, dataType);
+        const result = convertData(data.data.results, type);
 
         return { success: true, pages, page: offset / limit + 1, data: result };
       })
@@ -356,67 +342,62 @@ module.exports = {
         };
       });
   },
+
   async getInfoById(id, type) {
     let info = await getById(id, type);
     if (info.success) {
       let data = info.data;
       let dataInfo = {};
       if (data.hasOwnProperty("events") && data.events.available) {
-        let items = data.events.available;
         let events = await getListsOfDataFromAnId(
           id,
           type,
-          { limit: 20, items },
+          { limit: 20 },
           "events"
         );
         dataInfo = { ...dataInfo, events };
       }
       if (data.hasOwnProperty("creators") && data.creators.available) {
-        let items = data.creators.available;
         let creators = await getListsOfDataFromAnId(
           id,
           type,
-          { limit: 20, items },
+          { limit: 20 },
           "creators"
         );
         dataInfo = { ...dataInfo, creators };
       }
       if (data.hasOwnProperty("characters") && data.characters.available) {
-        let items = data.characters.available;
         let characters = await getListsOfDataFromAnId(
           id,
           type,
-          { limit: 20, items },
+          { limit: 20 },
           "characters"
         );
         dataInfo = { ...dataInfo, characters };
       }
       if (data.hasOwnProperty("comics") && data.comics.available) {
-        let items = data.comics.available;
         let comics = await getListsOfDataFromAnId(
           id,
           type,
-          { limit: 20, items },
+          { limit: 20 },
           "comics"
         );
         dataInfo = { ...dataInfo, comics };
       }
       if (data.hasOwnProperty("stories") && data.stories.available) {
-        let items = data.stories.available;
         let stories = await getListsOfDataFromAnId(
           data.id,
           type,
-          { limit: 20, items },
+          { limit: 20 },
           "stories"
         );
         dataInfo = { ...dataInfo, stories };
       }
       if (data.hasOwnProperty("series") && data.series.available) {
-        let items = data.series.available;
         let series = await getListsOfDataFromAnId(
           data.id,
           type,
-          { limit: 20, items },
+          { limit: 20 },
           "series"
         );
         dataInfo = { ...dataInfo, series };
